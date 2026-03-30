@@ -1,0 +1,2171 @@
+<!DOCTYPE html>
+
+<html lang="ar" dir="rtl">
+
+
+
+<head>
+
+    
+    <meta charset="UTF-8">
+
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <title>منصة أ.محمد زايد - مشغل الدروس</title>
+
+    
+    <meta name="theme-color" content="#00e5ff">
+
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    
+    <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
+
+    
+    <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
+
+    
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    
+    <link        
+    href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800;900&family=Tajawal:wght@300;400;700;800;900&display=swap"
+    rel="stylesheet">
+
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-3KPK3NB6X1"></script>
+    
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+
+    gtag('config', 'G-3KPK3NB6X1');
+    </script>
+
+    <style>
+    /* ═══════════════════════════════════════════════════════════════════
+    THE GLASS VAULT — PLAYER PAGE
+    Author: Mustafa Mahmoud | Platform: أ. محمد زايد
+    ★ دالة رمضان محفوظة بالكامل — لا تُحذف ولا تُعدّل ★
+═══════════════════════════════════════════════════════════════════ */
+    :root {
+    --black: #020617;
+    --deep: #060d1a;
+    --surface: #0a1628;
+    --surface2: #0f1729;
+    --accent: #00e5ff;
+    --accent2: #0066ff;
+    --accent-glow: rgba(0, 229, 255, 0.15);
+    --text: #e8f4fd;
+    --text-muted: #5a7a99;
+    --green: #10b981;
+    --green-dim: rgba(16, 185, 129, 0.10);
+    --border: rgba(0, 229, 255, 0.08);
+    --border-bright: rgba(0, 229, 255, 0.28);
+    --gold: #ffd700;
+    --gold-dim: rgba(255, 215, 0, 0.10);
+    --glass-bg: rgba(15, 23, 42, 0.6);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --red: #ef4444;
+    }
+
+    *,
+    *::before,
+    *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    }
+
+    * {
+    font-family: 'Tajawal', 'Cairo', sans-serif;
+    }
+
+    ::-webkit-scrollbar {
+    width: 4px;
+    }
+
+    ::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.02);
+    }
+
+    ::-webkit-scrollbar-thumb {
+    background: rgba(0, 229, 255, 0.3);
+    border-radius: 10px;
+    }
+
+    html,
+    body {
+    height: 100%;
+    }
+
+    body {
+    background-color: var(--black);
+    min-height: 100vh;
+    overflow-x: hidden;
+    color: var(--text);
+    }
+
+    /* ── IMMERSIVE BACKGROUND ── */
+    #gv-bg {
+    position: fixed;
+    inset: 0;
+    z-index: -2;
+    overflow: hidden;
+    }
+
+    #gv-bg-img {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    filter: blur(8px);
+    opacity: 0.25;
+    transform: scale(1.05);
+    }
+
+    #gv-grid {
+    position: absolute;
+    inset: 0;
+    background-image: linear-gradient(rgba(0, 229, 255, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 229, 255, 0.07) 1px, transparent 1px);
+    background-size: 50px 50px;
+    opacity: 0.18;
+    }
+
+    #gv-scanner {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background: rgba(0, 229, 255, 0.35);
+    box-shadow: 0 0 15px rgba(0, 229, 255, 0.5);
+    z-index: 10;
+    pointer-events: none;
+    animation: scannerSweep 8s linear infinite;
+    }
+
+    @keyframes scannerSweep {
+    0% {
+    top: -10%;
+    }
+
+    100% {
+    top: 110%;
+    }
+    }
+
+    .glass-panel {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    }
+
+    .breathing-border {
+    border: 2px solid rgba(0, 229, 255, 0.3);
+    animation: breathingBorder 3s ease-in-out infinite;
+    }
+
+    @keyframes breathingBorder {
+
+    0%,
+    100% {
+    border-color: rgba(0, 229, 255, 0.3);
+    box-shadow: 0 0 15px rgba(0, 229, 255, 0.2);
+    }
+
+    50% {
+    border-color: rgba(0, 229, 255, 0.8);
+    box-shadow: 0 0 30px rgba(0, 229, 255, 0.5);
+    }
+    }
+
+    .ambient-glow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 110%;
+    height: 110%;
+    background: radial-gradient(circle, rgba(0, 229, 255, 0.15) 0%, transparent 70%);
+    z-index: -1;
+    filter: blur(40px);
+    }
+
+    /* ── NAVBAR ── */
+    #gv-nav {
+    position: relative;
+    z-index: 50;
+    width: 100%;
+    padding: 24px 24px 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    }
+
+    .gv-logo {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    text-decoration: none;
+    }
+
+    .gv-logo-mark {
+    width: 44px;
+    height: 44px;
+    border: 1.5px solid var(--accent);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    font-weight: 900;
+    color: var(--accent);
+    box-shadow: 0 0 20px rgba(0, 229, 255, 0.22), inset 0 0 10px rgba(0, 229, 255, 0.06);
+    background: rgba(0, 229, 255, 0.07);
+    flex-shrink: 0;
+    }
+
+    .gv-logo-text {
+    font-weight: 800;
+    font-size: 1rem;
+    color: var(--text);
+    }
+
+    .gv-logo-text span {
+    color: var(--accent);
+    }
+
+    .gv-logo-sub {
+    font-size: 0.6rem;
+    color: rgba(0, 229, 255, 0.5);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    display: block;
+    }
+
+    .gv-nav-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    }
+
+    .gv-back-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 18px;
+    background: rgba(0, 229, 255, 0.06);
+    border: 1px solid var(--border-bright);
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 0.82rem;
+    border-radius: 100px;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-family: 'Cairo', sans-serif;
+    text-decoration: none;
+    }
+
+    .gv-back-btn:hover {
+    background: rgba(0, 229, 255, 0.12);
+    transform: translateX(3px);
+    }
+
+    .gv-username-badge {
+    padding: 6px 16px;
+    background: rgba(0, 229, 255, 0.06);
+    border: 1px solid rgba(0, 229, 255, 0.18);
+    border-radius: 100px;
+    color: var(--accent);
+    font-size: 0.8rem;
+    font-weight: 700;
+    white-space: nowrap;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    }
+
+    .gv-logout-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 18px;
+    background: transparent;
+    border: 1px solid rgba(255, 80, 80, 0.22);
+    color: #ff6b6b;
+    font-family: 'Cairo', sans-serif;
+    font-weight: 700;
+    font-size: 0.82rem;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s;
+    }
+
+    .gv-logout-btn:hover {
+    background: rgba(255, 80, 80, 0.1);
+    }
+
+    /* ── MAIN LAYOUT ── */
+    #gv-main {
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 8px 24px 48px;
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    gap: 24px;
+    align-items: start;
+    }
+
+    /* Responsive media queries are moved to the bottom of the stylesheet */
+
+    /* ── PLAYER SECTION ── */
+    #gv-player-section {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    }
+
+    .gv-player-wrap {
+    position: relative;
+    }
+
+    .gv-player-frame {
+    border-radius: 24px;
+    overflow: hidden;
+    position: relative;
+    z-index: 10;
+    }
+
+    #gv-playerContainer {
+    width: 100%;
+    aspect-ratio: 16/9;
+    background: #000;
+    position: relative;
+    }
+
+    /* ══════════════════════════════════════════════
+    WATERMARK — خفيف وشفاف جداً
+    ══════════════════════════════════════════════ */
+    #watermark {
+    position: absolute;
+    z-index: 2147483647;
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-select: none;
+    background: transparent;
+    padding: 4px 10px;
+    /* النص */
+    font-size: 0.85rem;
+    font-weight: 400;
+    /* بدون خط عريض */
+    line-height: 1.5;
+    color: rgba(16, 185, 129, 0.75);
+    /* لون أخضر أغمق قليلاً */
+    text-align: center;
+    /* انتقال سلس */
+    transition: top 1s ease, left 1s ease;
+    display: block !important;
+    }
+
+    /* Plyr overrides */
+    .plyr {
+    border-radius: 0 !important;
+    }
+
+    /* إصلاح ظهور العلامة المائية في وضع ملء الشاشة */
+    .plyr--fullscreen-fallback #watermark,
+    .plyr:-webkit-full-screen #watermark,
+    .plyr:fullscreen #watermark {
+    z-index: 2147483647 !important;
+    display: block !important;
+    }
+
+    /* حيلة إخفاء اليوتيوب العبقرية (النسخة الأقوى لجميع الشاشات) */
+    .plyr__video-embed {
+    overflow: hidden !important;
+    border-radius: 24px;
+    position: relative;
+    }
+
+    .plyr__video-embed iframe {
+    transform: none !important;
+
+    /* التعديل هنا: زيادة الطول لـ 3 أضعاف لضمان طرد شريط يوتيوب نهائياً */
+    height: 300% !important;
+    width: 100% !important;
+
+    /* التعديل هنا: رفع الشاشة لفوق بمقدار الضعف لضبط الفيديو في المنتصف بالمللي */
+    position: absolute !important;
+    top: -100% !important;
+    left: 0 !important;
+
+    pointer-events: none !important;
+    }
+
+    ._yt_playing .plyr__video-embed iframe {
+    pointer-events: none !important;
+    }
+
+    /* طبقة الدبل كليك - تم رفعها من الأسفل لترك مساحة حرة لشريط التحكم */
+    .gv-click-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 65px;
+    /* السر هنا: تركنا آخر 65 بيكسل تحت حرة عشان الزراير تشتغل */
+    z-index: 10;
+    cursor: pointer;
+    }
+
+    /* تأثير الدبل كليك الجمالي (Glow) */
+    .seek-feedback {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(16, 31, 34, 0.8);
+    color: var(--accent);
+    padding: 12px 24px;
+    border-radius: 50px;
+    font-weight: 900;
+    font-size: 1.2rem;
+    pointer-events: none;
+    opacity: 0;
+    z-index: 100 !important;
+    border: 2px solid var(--accent);
+    box-shadow: 0 0 20px rgba(0, 229, 255, 0.6);
+    transition: opacity 0.2s;
+    }
+
+    .seek-feedback.show {
+    opacity: 1;
+    animation: popFeedback 0.4s ease-out forwards;
+    }
+
+    @keyframes popFeedback {
+    0% {
+    transform: translateY(-50%) scale(0.8);
+    }
+
+    50% {
+    transform: translateY(-50%) scale(1.1);
+    }
+
+    100% {
+    transform: translateY(-50%) scale(1);
+    }
+    }
+
+    /* رفع شريط التحكم (التكبير، الصوت، الشريط) ليكون فوق كل الطبقات وقابل للضغط */
+    .plyr__controls {
+    z-index: 99 !important;
+    pointer-events: auto !important;
+    }
+
+    /* ── CUSTOM PLAYER OVERLAY ── */
+    .custom-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    }
+
+    .plyr__container:hover .custom-overlay,
+    .plyr--paused .custom-overlay {
+    opacity: 1;
+    }
+
+    .center-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 40px;
+    width: 100%;
+    pointer-events: none;
+    }
+
+    .skip-btn {
+    pointer-events: all;
+    cursor: pointer;
+    background: rgba(4, 8, 18, 0.75);
+    color: #fff;
+    border: 1px solid var(--border-bright);
+    border-radius: 50%;
+    width: 52px;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+    backdrop-filter: blur(8px);
+    transition: transform 0.2s, background 0.2s;
+    }
+
+    .skip-btn:hover {
+    background: rgba(0, 229, 255, 0.25);
+    transform: scale(1.1);
+    }
+
+    .skip-btn svg {
+    width: 20px;
+    height: 20px;
+    fill: white;
+    }
+
+    .custom-bottom-btn {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 5px 10px !important;
+    font-weight: bold;
+    font-size: 13px;
+    background: transparent;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    margin-right: 5px;
+    border-radius: 4px;
+    transition: all 0.2s;
+    }
+
+    .custom-bottom-btn:hover {
+    background: rgba(0, 229, 255, 0.18) !important;
+    color: var(--accent) !important;
+    }
+
+    .custom-quality-menu,
+    .custom-speed-menu {
+    position: absolute;
+    bottom: 65px;
+    background: rgba(4, 8, 18, 0.98);
+    border: 1px solid var(--border-bright);
+    border-radius: 14px;
+    padding: 6px;
+    width: 110px;
+    z-index: 3000;
+    backdrop-filter: blur(20px);
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.8);
+    transform: translateX(-40%);
+    }
+
+    .custom-quality-menu.hidden,
+    .custom-speed-menu.hidden {
+    display: none;
+    }
+
+    .q-header,
+    .s-header {
+    text-align: center;
+    font-size: 10px;
+    color: var(--accent);
+    font-weight: 900;
+    padding: 4px 0;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 4px;
+    letter-spacing: 1px;
+    }
+
+    .q-option,
+    .s-option {
+    padding: 8px;
+    font-size: 12px;
+    color: #fff;
+    cursor: pointer;
+    border-radius: 6px;
+    text-align: center;
+    transition: 0.2s;
+    }
+
+    .q-option:hover,
+    .s-option:hover {
+    background: rgba(0, 229, 255, 0.15);
+    color: var(--accent);
+    }
+
+    .q-option.selected,
+    .s-option.selected {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #000;
+    font-weight: bold;
+    }
+
+    /* ── QUICK ACTIONS ── */
+    .gv-quick-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding-top: 8px;
+    }
+
+    .gv-action-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-muted);
+    font-weight: 700;
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-family: 'Cairo', sans-serif;
+    text-decoration: none;
+    backdrop-filter: blur(10px);
+    }
+
+    .gv-action-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text);
+    transform: translateY(-2px);
+    }
+
+    .gv-action-btn.done-btn {
+    background: rgba(0, 229, 255, 0.08);
+    border-color: rgba(0, 229, 255, 0.3);
+    color: var(--accent);
+    }
+
+    .gv-action-btn.done-btn:hover {
+    background: rgba(0, 229, 255, 0.16);
+    }
+
+    .gv-action-btn.done-btn.done {
+    background: rgba(16, 185, 129, 0.12);
+    color: var(--green);
+    border-color: rgba(16, 185, 129, 0.3);
+    }
+
+    .gv-action-btn.fav-btn.fav-active {
+    color: #f87171;
+    border-color: rgba(248, 113, 113, 0.4);
+    background: rgba(248, 113, 113, 0.08);
+    }
+
+    /* ── VIDEO META ── */
+    #gv-video-meta {
+    padding: 24px;
+    border-radius: 20px;
+    }
+
+    #gv-modalTitle {
+    font-size: 1.25rem;
+    font-weight: 900;
+    color: var(--text);
+    margin-bottom: 8px;
+    line-height: 1.4;
+    }
+
+    #gv-modalDesc {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    line-height: 1.7;
+    }
+
+    /* ── SIDEBAR ── */
+    #gv-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    }
+
+    .gv-lesson-orbit {
+    border-radius: 20px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    max-height: 560px;
+    }
+
+    .gv-lesson-orbit-head {
+    padding: 16px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.04);
+    font-weight: 700;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+    }
+
+    .gv-lesson-orbit-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    }
+
+    .gv-lesson-orbit-body::-webkit-scrollbar {
+    width: 4px;
+    }
+
+    .gv-lesson-orbit-body::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.02);
+    }
+
+    .gv-lesson-orbit-body::-webkit-scrollbar-thumb {
+    background: rgba(0, 229, 255, 0.3);
+    border-radius: 10px;
+    }
+
+    /* ══════════════════════════════════════════════
+    LESSON ITEMS — بدون URLs في الـ HTML
+    ══════════════════════════════════════════════ */
+    .gv-lesson-item {
+    position: relative;
+    cursor: pointer;
+    transition: all 0.2s;
+    /* لا يوجد data-url أو data-pdf في الـ HTML */
+    }
+
+    .gv-lesson-item .gv-li-line {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    border-radius: 3px;
+    }
+
+    .gv-lesson-item .gv-li-inner {
+    margin-right: 12px;
+    padding: 14px 16px;
+    border-radius: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid transparent;
+    transition: all 0.2s;
+    }
+
+    .gv-lesson-item:hover .gv-li-inner {
+    background: rgba(255, 255, 255, 0.06);
+    }
+
+    .gv-lesson-item.watched .gv-li-line {
+    background: var(--green);
+    box-shadow: 0 0 10px #10b981;
+    }
+
+    .gv-lesson-item.watched .gv-li-inner {
+    border-color: rgba(16, 185, 129, 0.2);
+    }
+
+    .gv-lesson-item.active .gv-li-line {
+    background: var(--accent);
+    box-shadow: 0 0 15px #00e5ff;
+    }
+
+    .gv-lesson-item.active .gv-li-inner {
+    border-color: rgba(0, 229, 255, 0.4);
+    background: rgba(255, 255, 255, 0.08);
+    }
+
+    .gv-lesson-item.locked-item {
+    opacity: 0.45;
+    cursor: not-allowed;
+    }
+
+    .gv-lesson-item .gv-li-status {
+    font-size: 0.7rem;
+    font-weight: 700;
+    display: block;
+    margin-bottom: 2px;
+    }
+
+    .gv-lesson-item.watched .gv-li-status {
+    color: var(--green);
+    }
+
+    .gv-lesson-item.active .gv-li-status {
+    color: var(--accent);
+    }
+
+    .gv-lesson-item.locked-item .gv-li-status {
+    color: var(--red);
+    }
+
+    .gv-lesson-item .gv-li-title {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--text);
+    }
+
+    .gv-lesson-item.active .gv-li-title {
+    font-weight: 800;
+    }
+
+    .gv-li-icon {
+    flex-shrink: 0;
+    font-size: 1rem;
+    }
+
+    .gv-lesson-item.watched .gv-li-icon {
+    color: var(--green);
+    }
+
+    .gv-lesson-item.active .gv-li-icon {
+    color: var(--accent);
+    }
+
+    .gv-lesson-item.locked-item .gv-li-icon {
+    color: var(--red);
+    }
+
+    /* ── SKELETON ── */
+    @keyframes shimmer {
+    0% {
+    background-position: -600px 0;
+    }
+
+    100% {
+    background-position: 600px 0;
+    }
+    }
+
+    .gv-skel {
+    border-radius: 14px;
+    height: 56px;
+    background: linear-gradient(90deg, rgba(0, 229, 255, 0.02) 25%, rgba(0, 229, 255, 0.06) 50%, rgba(0, 229, 255, 0.02) 75%);
+    background-size: 1200px 100%;
+    animation: shimmer 1.6s infinite linear;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+    position: relative;
+    z-index: 10;
+    background: rgba(4, 8, 18, 0.97);
+    backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 24px 24px 0 0;
+    margin-top: 16px;
+    }
+
+    /* ── ANIMATIONS ── */
+    @keyframes nd-fadeUp {
+    from {
+    opacity: 0;
+    transform: translateY(18px);
+    }
+
+    to {
+    opacity: 1;
+    transform: translateY(0);
+    }
+    }
+
+    @keyframes nd-fadeIn {
+    from {
+    opacity: 0;
+    }
+
+    to {
+    opacity: 1;
+    }
+    }
+
+    @keyframes nd-pulse {
+
+    0%,
+    100% {
+    opacity: 1
+    }
+
+    50% {
+    opacity: 0.3
+    }
+    }
+
+    /* ── LOADING ── */
+    #gv-loading {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: var(--black);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 20px;
+    }
+
+    #gv-loading.hidden {
+    display: none;
+    }
+
+    .gv-spinner {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: 3px solid rgba(0, 229, 255, 0.1);
+    border-top-color: var(--accent);
+    animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+    to {
+    transform: rotate(360deg);
+    }
+    }
+
+    #gv-no-video {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    min-height: 300px;
+    gap: 16px;
+    animation: nd-fadeUp 0.4s ease;
+    }
+
+    /* ── شاشة النهاية (لإخفاء مقترحات يوتيوب) ── */
+    .gv-end-screen {
+    position: absolute;
+    inset: 0;
+    background: #020617;
+    /* لون الخلفية الداكن لسد الشاشة بالكامل */
+    z-index: 95;
+    /* تحت شريط التحكم وفوق اليوتيوب */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+    }
+
+    .gv-end-screen.show {
+    opacity: 1;
+    pointer-events: auto;
+    }
+
+    .gv-end-screen-content {
+    text-align: center;
+    background: rgba(16, 31, 34, 0.7);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--border-bright);
+    padding: 40px 50px;
+    border-radius: 24px;
+    transform: translateY(20px);
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+
+    .gv-end-screen.show .gv-end-screen-content {
+    transform: translateY(0);
+    }
+
+    /* ── CHAPTERS SECTION (Revamped Style) ── */
+    .nav-chapter-btn {
+    padding: 6px 16px;
+    background: rgba(0, 229, 255, 0.1);
+    border: 1px solid var(--border-bright);
+    border-radius: 10px;
+    color: var(--accent);
+    font-size: 0.75rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.3s;
+    }
+
+    .nav-chapter-btn:hover {
+    background: var(--accent);
+    color: #000;
+    }
+
+    /* Cards with different shapes, colors, and layout */
+    .chapter-card {
+    background: linear-gradient(145deg, rgba(20, 25, 40, 0.7), rgba(10, 15, 30, 0.9));
+    border-right: 4px solid rgba(0, 229, 255, 0.3);
+    border-radius: 8px 16px 16px 8px;
+    padding: 14px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    min-height: 85px;
+    position: relative;
+    overflow: hidden;
+    }
+
+    .chapter-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at top right, rgba(16, 185, 129, 0.1), transparent 60%);
+    opacity: 0;
+    transition: opacity 0.3s;
+    }
+
+    .chapter-card:hover {
+    background: linear-gradient(145deg, rgba(30, 35, 55, 0.8), rgba(15, 20, 40, 0.9));
+    border-right-color: #10b981; /* Emerald green accent */
+    transform: translateX(-4px);
+    box-shadow: -8px 8px 20px rgba(0, 0, 0, 0.4);
+    }
+
+    .chapter-card:hover::before {
+    opacity: 1;
+    }
+
+    .chapter-card.active-part {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(0, 229, 255, 0.1));
+    border-right: 6px solid #00e5ff;
+    transform: translateX(-6px) scale(1.02);
+    box-shadow: -10px 10px 25px rgba(0, 229, 255, 0.15);
+    }
+
+    .chapter-time {
+    font-size: 0.7rem;
+    color: #10b981; /* Different color for time */
+    font-weight: 900;
+    margin-bottom: 6px;
+    letter-spacing: 0.5px;
+    background: rgba(16, 185, 129, 0.1);
+    padding: 2px 8px;
+    border-radius: 4px;
+    display: inline-block;
+    align-self: flex-start;
+    }
+
+    .chapter-card.active-part .chapter-time {
+    color: #00e5ff;
+    background: rgba(0, 229, 255, 0.15);
+    }
+
+    .chapter-card.active-part .fw-rest,
+    .chapter-card.active-part .fw-accent {
+    color: #ffffff;
+    text-shadow: 0 0 10px rgba(0, 229, 255, 0.4);
+    }
+
+    /* Font styling */
+    .fw-accent {
+    font-family: 'Tajawal', sans-serif;
+    font-size: 0.95rem;
+    color: #fbbf24; /* Amber Gold color */
+    font-weight: 900;
+    margin-left: 2px;
+    }
+
+    .fw-rest {
+    font-family: 'Cairo', sans-serif;
+    font-size: 0.75rem;
+    color: #d8b4fe; /* Soft Lavender Purple to contrast and look distinct */
+    font-weight: 600;
+    line-height: 1.4;
+    }
+
+    @media(max-width:1024px) {
+    #gv-main {
+    grid-template-columns: 1fr;
+    }
+    #gv-player-section { 
+    display: contents !important; 
+    }
+    .gv-player-wrap { order: 1; }
+    #gv-actions { order: 2; margin-top: 16px; margin-bottom: 16px; }
+    #gv-sidebar { order: 3; margin-bottom: 16px; }
+    #gv-chapters-section { order: 4; margin-bottom: 16px; }
+    #gv-video-meta { order: 5; }
+    }
+
+    @media(max-width:640px) {
+    #gv-nav { padding: 16px 14px 4px; }
+    #gv-main { padding: 4px 12px 32px; gap: 16px; }
+    .gv-username-badge { display: none; }
+    .gv-logout-btn span { display: none; }
+    .gv-logout-btn { padding: 8px 12px; }
+    }
+    </style>
+
+    <!-- منـع الـ Right Click (الكليك يمين) حفاظاً على المحتوى -->
+    
+    <script>
+    document.addEventListener('contextmenu', event => event.preventDefault());
+    document.onkeydown = function (e) {
+    // منع F12
+    if (e.code == 'F12') {
+    e.preventDefault();
+    return false;
+    }
+    // منع Ctrl+Shift+I و Ctrl+Shift+J و Ctrl+U
+    if (e.ctrlKey && e.shiftKey && (e.code == 'KeyI' || e.code == 'KeyJ')) {
+    e.preventDefault();
+    return false;
+    }
+    if (e.ctrlKey && e.code == 'KeyU') {
+    e.preventDefault();
+    return false;
+    }
+    };
+    </script>
+</head>
+
+<body>
+
+    <!-- Loading overlay -->
+    <div id="gv-loading">
+    <div style="font-size:2.5rem;">🎬</div>
+    <div class="gv-spinner"></div>
+    <p style="color:var(--text-muted);font-size:0.9rem;">جاري تحميل الكورس...</p>
+    </div>
+
+    <!-- Immersive Background -->
+    <div id="gv-bg">
+    <div id="gv-bg-img"></div>
+    <div id="gv-grid"></div>
+    <div id="gv-scanner"></div>
+    </div>
+
+    <!-- NAVBAR -->
+    <nav id="gv-nav">
+    <a href="course.html" class="gv-logo">
+    <div class="gv-logo-mark">م</div>
+    <div class="gv-logo-text">
+    أ. <span>محمد زايد</span>
+    </div>
+    </a>
+    <div class="gv-nav-right">
+    <span id="gv-userName" class="gv-username-badge"></span>
+    <a href="course.html" class="gv-back-btn">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+    stroke-width="2.5"                     stroke-linecap="round" stroke-linejoin="round">
+    
+    <polyline points="15 18 9 12 15 6" />
+    
+    </svg>
+    <span>الكورسات</span>
+    </a>
+    <button class="gv-logout-btn" onclick="_doLogout()">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+    stroke-width="2.5"                     stroke-linecap="round" stroke-linejoin="round">
+    
+    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+    
+    <polyline points="16 17 21 12 16 7" />
+    
+    <line x1="21" y1="12" x2="9" y2="12" />
+    
+    </svg>
+    <span>خروج</span>
+    </button>
+    </div>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <div id="gv-main">
+
+    <!-- PLAYER SECTION -->
+    <section id="gv-player-section">
+
+    <!-- Player -->
+    <div class="gv-player-wrap">
+    <div class="ambient-glow"></div>
+    <div class="glass-panel gv-player-frame breathing-border">
+    <div id="gv-playerContainer">
+    <div id="gv-no-video">
+    <div style="font-size:3rem;opacity:0.3;">🎬</div>
+    <p style="color:var(--text-muted);font-size:0.9rem;">اختر درساً
+    من القائمة</p>
+    </div>
+    <div id="watermark"></div>
+    </div>
+    </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="gv-quick-actions" id="gv-actions" style="display:none;">
+    <button class="gv-action-btn feedback-btn" onclick="openFeedbackModal()" style="color: #fbbf24; border-color: rgba(251, 191, 36, 0.3); background: rgba(251, 191, 36, 0.05); font-weight: bold;">
+        <span class="material-symbols-outlined text-sm ml-1">tips_and_updates</span> اقترح أو فضفض
+    </button>
+    <button id="_v5_doneBtn" class="gv-action-btn done-btn" onclick="_v5_markCurrentDone()">
+    ✔ تم إنهاء الدرس
+    </button>
+    <button class="gv-action-btn fav-btn" id="_v5_favBtn" onclick="_v5_toggleFav()">
+    ❤️ المفضلة
+    </button>
+    <a id="gv-pdfLink" href="#" target="_blank" download style="display:none;"
+    class="gv-action-btn">
+    📄 تحميل PDF
+    </a>
+    </div>
+
+    <!-- Video Meta -->
+    <div id="gv-video-meta" class="glass-panel" style="display:none;">
+    <h2 id="gv-modalTitle"                    
+    style="font-size:1.25rem;font-weight:900;color:var(--text);margin-bottom:8px;line-height:1.4;"></h2>
+    <p id="gv-modalDesc" style="font-size:0.85rem;color:var(--text-muted);line-height:1.7;">
+    </p>
+    </div>
+
+    <!-- Chapters Section (Moved Below Meta) -->
+    <div id="gv-chapters-section" class="glass-panel p-4 rounded-3xl mt-4" style="display:none; border: 1px solid rgba(16, 185, 129, 0.2); background: rgba(5, 10, 20, 0.6);">
+    <div class="flex justify-between items-center mb-4 px-2">
+    <h3 class="text-sm font-extrabold flex items-center gap-2">
+    <span style="font-size: 1.6rem; line-height: 1;">🗺️</span>
+    <span style="background: linear-gradient(to right, #10b981, #00e5ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">أجزاء المحاضرة</span>
+    </h3>
+    <div class="flex gap-2">
+    <button id="prevPart" class="nav-chapter-btn" onclick="_v5_prevChapter()">السابق</button>
+    <button id="nextPart" class="nav-chapter-btn" onclick="_v5_nextChapter()">التالي</button>
+    </div>
+    </div>
+    <!-- 3 columns on lg, 2 on md, 1 on mobile -->
+    <div id="chaptersGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+    </div>
+    </div>
+
+    </section>
+
+    <!-- SIDEBAR -->
+    <aside id="gv-sidebar">
+    <div class="glass-panel gv-lesson-orbit">
+    <div class="gv-lesson-orbit-head">
+    <span style="color:var(--accent);">⬡</span>
+    <span id="gv-orbit-title">فهرس الوحدة التدريبية</span>
+    </div>
+    <div class="gv-lesson-orbit-body" id="gv-lessonList">
+    <div class="gv-skel"></div>
+    <div class="gv-skel" style="opacity:.75;"></div>
+    <div class="gv-skel" style="opacity:.55;"></div>
+    <div class="gv-skel" style="opacity:.35;"></div>
+    </div>
+    </div>
+
+    </aside>
+    </div>
+
+    <!-- 💡 صندوق الاقتراحات والفضفضة (Modal) -->
+    <div id="feedbackModal" class="fixed inset-0 z-[300] bg-black/80 backdrop-blur-md hidden items-center justify-center p-4">
+        <div class="glass-panel w-full max-w-md p-6 rounded-3xl border border-yellow-400/30 shadow-[0_0_40px_rgba(251,191,36,0.2)] scale-90 opacity-0 transition-all duration-300" id="feedbackModalContent">
+            <h3 class="font-black text-yellow-400 text-lg mb-2 flex items-center gap-2">💡 صندوق الاقتراحات والفضفضة</h3>
+            <p class="text-xs text-slate-400 mb-4 font-bold leading-relaxed">المساحة دي معمولة عشان تسمعك براحتك.. عندك مشكلة، محتاج نصيحة، أو فكرة لتطوير المنصة؟ اكتب اللي في قلبك ومستر محمد زايد هيقراه بنفسه. (هويتك مخفية تماماً 🤫).</p>
+            
+            <textarea id="feedbackText" class="w-full h-32 bg-black/50 border border-white/10 rounded-xl p-4 text-white text-sm outline-none focus:border-yellow-400 resize-none transition-colors" placeholder="فضفض، اقترح، أو اكتب مشكلتك هنا..."></textarea>
+            
+            <div class="flex gap-3 mt-4">
+                <button onclick="sendFeedbackToSupabase()" class="flex-1 bg-gradient-to-r from-yellow-500 to-yellow-400 text-black font-black py-3 rounded-xl shadow-lg hover:scale-[1.02] transition-transform">إرسال رسالتك 🚀</button>
+                <button onclick="closeFeedbackModal()" class="px-6 text-slate-400 hover:text-white font-bold transition-colors">إلغاء</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="py-10 mt-auto">
+    <div style="max-width:1400px;margin:0 auto;padding:0 24px;">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+    <a href="https://wa.me/201000623768" target="_blank"                    
+    class="flex items-center gap-4 p-4 rounded-2xl transition-all"                    
+    style="background:rgba(0,229,255,0.04);border:1px solid rgba(0,229,255,0.1);"                    
+    onmouseover="this.style.background='rgba(0,229,255,0.08)'"                    
+    onmouseout="this.style.background='rgba(0,229,255,0.04)'">
+    <div class="w-12 h-12 rounded-xl flex items-center justify-center"
+    style="background:#25d366;">
+    <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+    
+    <path                                
+    d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L0 24l6.335-1.662c1.72.94 3.659 1.437 5.634 1.437h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+    
+    </svg>
+    </div>
+    <div>
+    <h4 style="font-weight:900;color:var(--accent);font-size:0.9rem;">اسأل
+    أ. محمد زايد</h4>
+    <p style="font-size:0.75rem;color:var(--text-muted);">للاستفسارات
+    العلمية</p>
+    </div>
+    </a>
+    <a href="https://wa.me/201001809230" target="_blank"                    
+    class="flex items-center gap-4 p-4 rounded-2xl transition-all"                    
+    style="background:rgba(0,102,255,0.04);border:1px solid rgba(0,102,255,0.12);"                    
+    onmouseover="this.style.background='rgba(0,102,255,0.09)'"                    
+    onmouseout="this.style.background='rgba(0,102,255,0.04)'">
+    <div                        
+    style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,rgba(0,102,255,0.2),rgba(0,229,255,0.1));border:2px solid var(--border-bright);display:flex;align-items:center;justify-content:center;font-size:1.4rem;">
+    🛠️</div>
+    <!-- ★ دالة رمضان — دالة وداله رمضان ★ -->
+    <div>
+    <h4 style="font-weight:900;color:#4488ff;font-size:0.9rem;">الدعم الفني
+    </h4>
+    <p style="font-size:0.75rem;color:var(--text-muted);">احنا هنا عشان
+    نساعدك</p>
+    </div>
+    </a>
+    </div>
+    <div class="flex flex-col md:flex-row justify-between items-center pt-5 gap-3 text-xs"          
+    style="border-top:1px solid rgba(255,255,255,0.06);">
+    <p style="color:var(--text-muted);">جميع الحقوق محفوظة لمنصة أ. محمد زايد © 2026</p>
+    <p style="color:var(--text-muted);">Created by
+    <a href="https://wa.me/201001809230" target="_blank"                        
+    style="color:var(--accent);font-weight:900;text-shadow:0 0 8px rgba(0,229,255,0.5);">Mustafa
+    Mahmoud</a>
+    <!-- ⭐ وداله رمضان ⭐ -->
+    </p>
+    </div>
+    </div>
+    </footer>
+
+    <!-- SUPABASE CONFIG -->
+    
+    <script src="supabase-config.js"></script>
+    
+    <script>
+    window.addEventListener('pageshow', function (e) { if (e.persisted) window.location.reload(); });
+
+    // ═══════════════════════════════════════════════════════
+    // 1. CORE VARIABLES
+    // ═══════════════════════════════════════════════════════
+    let player = null;
+    let watermarkInterval = null;
+    let currentUserData = { name: '', phone: '', email: '' };
+    let _v5_currentVideoId = null;
+    let _v5_currentVideoTitle = '';
+    let _v5_currentVideoUrl = '';
+    let _v5_currentVideoType = '';
+    let _v5_currentChapters = [];
+    let _v5_activeChapterIndex = -1;
+
+    // ══════════════════════════════════════════════════════════
+    // 🔐 VIDEO DATA STORE — بيانات الفيديوهات في الـ Memory فقط
+    //    مش ظاهرة في الـ HTML نهائياً
+    // ══════════════════════════════════════════════════════════
+    const _videoStore = new Map();
+    // Structure: _videoStore.set(videoId, { url, type, title, desc, pdf })
+
+    // URL PARAMS
+    const _urlParams = new URLSearchParams(window.location.search);
+    const courseId = _urlParams.get('course_id');
+    const initVideoId = _urlParams.get('video_id');
+
+    // ═══════════════════════════════════════════════════════
+    // SMART YOUTUBE THUMBNAIL FALLBACK
+    // ═══════════════════════════════════════════════════════
+    window.getBestYtThumb = function (imgElement, vidId) {
+    const qualities = ['mqdefault.jpg', 'sddefault.jpg', 'default.jpg'];
+    let attempt = parseInt(imgElement.getAttribute('data-attempt') || '0');
+    if (attempt < qualities.length) {
+    imgElement.src = `https://img.youtube.com/vi/${vidId}/${qualities[attempt]}`;
+    imgElement.setAttribute('data-attempt', attempt + 1);
+    } else {
+    imgElement.style.display = 'none';
+    if (imgElement.parentElement) imgElement.parentElement.style.background = 'linear-gradient(135deg,#050b14,#0d1f38)';
+    }
+    };
+
+    // ═══════════════════════════════════════════════════════
+    // 2. LOGOUT
+    // ═══════════════════════════════════════════════════════
+    async function _doLogout() {
+    await window.supabase.auth.signOut();
+    window.location.href = 'index.html';
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // 3. MARK VIDEO WATCHED
+    // ═══════════════════════════════════════════════════════
+    async function markVideoAsWatched(videoId) {
+    const { data: { user } } = await window.supabase.auth.getUser();
+    if (!user) return;
+    const { error } = await window.supabase.from('video_progress').upsert(
+    { user_id: user.id, video_id: videoId },
+    { onConflict: 'user_id, video_id' }
+    );
+    if (!error) {
+    calculateStudentProgress();
+    const itemEl = document.querySelector(`.gv-lesson-item[data-vid="${videoId}"]`);
+    if (itemEl) {
+    itemEl.classList.remove('active');
+    itemEl.classList.add('watched');
+    const statusEl = itemEl.querySelector('.gv-li-status');
+    const iconEl = itemEl.querySelector('.gv-li-icon');
+    if (statusEl) statusEl.textContent = 'مكتمل';
+    if (iconEl) iconEl.textContent = '✅';
+    }
+    }
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // 4. CALCULATE STUDENT PROGRESS
+    // ═══════════════════════════════════════════════════════
+    async function calculateStudentProgress() {
+    try {
+    const { data: { user } } = await window.supabase.auth.getUser();
+    if (!user) return;
+    const { data: enroll } = await window.supabase.from('enrollments').select('course_id').eq('student_id', user.id);
+    if (!enroll || enroll.length === 0) return;
+    const { count: total } = await window.supabase.from('videos').select('*', { count: 'exact', head: true }).in('course_id', enroll.map(e => e.course_id));
+    const { data: watched } = await window.supabase.from('video_progress').select('video_id').eq('user_id', user.id);
+    const count = watched ? watched.length : 0;
+    const percent = total === 0 ? 0 : Math.round((count / total) * 100);
+    } catch (err) { console.error(err); }
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // 5. PLAY VIDEO — يستقبل ID فقط، يجيب الباقي من _videoStore
+    // ═══════════════════════════════════════════════════════
+    window.playVideoById = function (videoId) {
+    const data = _videoStore.get(videoId);
+    if (!data) return;
+    playVideo(videoId, data.url, data.type, data.title, data.desc, data.pdf, data.chapters);
+    };
+
+    window.playVideo = function (videoId, url, type, title, desc, pdfUrl, chapters) {
+    if (type === 'meet') { window.open(url, '_blank'); return; }
+
+    _v5_currentVideoId = videoId;
+    _v5_currentVideoTitle = title;
+    _v5_currentVideoUrl = url;
+    _v5_currentVideoType = type;
+
+    // Update URL without reload
+    const newUrl = new URL(window.location.href);
+    newUrl.searchParams.set('video_id', videoId);
+    window.history.replaceState({}, '', newUrl.toString());
+
+    // Update meta panel
+    document.getElementById('gv-modalTitle').textContent = title;
+    document.getElementById('gv-modalDesc').textContent = desc || '';
+    document.getElementById('gv-video-meta').style.display = 'block';
+    renderChapters(chapters);
+    document.getElementById('gv-actions').style.display = 'flex';
+
+    // PDF link
+    const pdfLinkEl = document.getElementById('gv-pdfLink');
+    if (pdfUrl) { pdfLinkEl.href = pdfUrl; pdfLinkEl.style.display = 'flex'; }
+    else { pdfLinkEl.style.display = 'none'; }
+
+    // Done button reset
+    const doneBtn = document.getElementById('_v5_doneBtn');
+    if (doneBtn) { doneBtn.classList.remove('done'); doneBtn.innerHTML = '✔ تم إنهاء الدرس'; doneBtn.disabled = false; }
+
+    // Fav button
+    const favBtn = document.getElementById('_v5_favBtn');
+    if (favBtn) {
+    let favs = []; try { favs = JSON.parse(localStorage.getItem('_v5_favs') || '[]'); } catch (e) { }
+    if (favs.includes(videoId)) { favBtn.textContent = '💔 إزالة من المفضلة'; favBtn.classList.add('fav-active'); }
+    else { favBtn.textContent = '❤️ المفضلة'; favBtn.classList.remove('fav-active'); }
+    }
+
+    // Update sidebar active state
+    document.querySelectorAll('.gv-lesson-item').forEach(el => el.classList.remove('active'));
+    const activeEl = document.querySelector(`.gv-lesson-item[data-vid="${videoId}"]`);
+    if (activeEl) {
+    activeEl.classList.add('active');
+    const statusEl = activeEl.querySelector('.gv-li-status');
+    const iconEl = activeEl.querySelector('.gv-li-icon');
+    if (statusEl && !activeEl.classList.contains('watched')) statusEl.textContent = 'قيد المشاهدة';
+    if (iconEl && !activeEl.classList.contains('watched')) iconEl.textContent = '▶';
+    activeEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    // Background
+    if (type === 'youtube') {
+    const bgVidId = (url.split('v=')[1] || url.split('/').pop()).split('&')[0];
+    document.getElementById('gv-bg-img').style.backgroundImage = `url(https://img.youtube.com/vi/${bgVidId}/maxresdefault.jpg)`;
+    }
+
+    // Save last watched (ID فقط)
+    try { localStorage.setItem('_v5_lastVideo', JSON.stringify({ videoId, courseId, time: Date.now() })); } catch (e) { }
+
+    // Destroy old player
+    const container = document.getElementById('gv-playerContainer');
+    document.getElementById('gv-no-video')?.remove();
+    container.innerHTML = '<div id="watermark"></div>';
+    if (player) { try { player.destroy(); } catch (e) { } player = null; }
+    if (watermarkInterval) { clearInterval(watermarkInterval); watermarkInterval = null; }
+
+    const plyrOptions = {
+    controls: ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'fullscreen'],
+    youtube: { noCookie: true, rel: 0, showinfo: 0, iv_load_policy: 3, modestbranding: 1, controls: 0, disablekb: 1 }
+    };
+
+    if (type === 'youtube') {
+    let id = url.split('v=')[1] || url.split('/').pop();
+    if (id && id.includes('&')) id = id.split('&')[0];
+    const playerDiv = document.createElement('div');
+    playerDiv.id = 'player';
+    playerDiv.setAttribute('data-plyr-provider', 'youtube');
+    playerDiv.setAttribute('data-plyr-embed-id', id);
+    container.insertBefore(playerDiv, container.firstChild);
+    player = new Plyr('#player', plyrOptions);
+    } else {
+    const videoEl = document.createElement('video');
+    videoEl.id = 'player'; videoEl.setAttribute('playsinline', ''); videoEl.setAttribute('controls', '');
+    videoEl.style.cssText = 'width:100%;height:100%;position:absolute;inset:0;';
+    const src = document.createElement('source');
+    src.src = url; src.type = 'video/mp4';
+    videoEl.appendChild(src);
+    container.insertBefore(videoEl, container.firstChild);
+    player = new Plyr('#player', plyrOptions);
+    }
+
+    player.on('play', () => {
+        player.muted = false; // فك الكتم فوراً
+        player.volume = 1;    // رفع مستوى الصوت لأعلى درجة
+    });
+
+    player.on('ready', () => {
+    const wrapper = document.querySelector('.plyr');
+    const controls = document.querySelector('.plyr__controls');
+    
+    // منطق الـ UI (شريط الفيديو والصوت في الوضع المصغر والممتلئ)
+    const progressContainer = document.querySelector('.plyr__progress__container');
+    const volumeContainer = document.querySelector('.plyr__volume');
+    if (progressContainer) {
+        progressContainer.style.flex = '1 1 auto';
+        progressContainer.style.order = '3';
+    }
+    if (volumeContainer) {
+        volumeContainer.style.display = 'none';
+    }
+
+    if (wrapper && !wrapper.querySelector('.custom-overlay')) {
+    const overlay = document.createElement('div');
+    overlay.className = 'custom-overlay';
+    overlay.innerHTML = `<div class="center-controls">
+    <div class="skip-btn" onclick="player.rewind(10)">
+    <svg viewBox="0 0 24 24"><path d="M11 18V6l-8.5 6 8.5 6zm.5-6l8.5 6V6l-8.5 6z"/></svg> <span>10-</span>
+    </div>
+    <div class="skip-btn" onclick="player.forward(10)">
+    <span>+10</span> <svg viewBox="0 0 24 24"><path d="M4 18l8.5-6L4 6v12zm9-12v12l8.5-6-8.5-6z"/></svg>
+    </div>
+    </div>`;
+    wrapper.appendChild(overlay);
+    }
+
+    if (wrapper && !wrapper.querySelector('.custom-quality-menu')) {
+    const qMenu = document.createElement('div');
+    qMenu.className = 'custom-quality-menu hidden';
+    qMenu.innerHTML = `<div class="q-header">الجودة</div><div class="q-option selected" onclick="selectQuality(this,'Auto')">Auto</div><div class="q-option" onclick="selectQuality(this,'1080p')">1080p</div><div class="q-option" onclick="selectQuality(this,'720p')">720p</div><div class="q-option" onclick="selectQuality(this,'480p')">480p</div><div class="q-option" onclick="selectQuality(this,'360p')">360p</div>`;
+    wrapper.appendChild(qMenu);
+    }
+    if (wrapper && !wrapper.querySelector('.custom-speed-menu')) {
+    const sMenu = document.createElement('div');
+    sMenu.className = 'custom-speed-menu hidden';
+    sMenu.innerHTML = `<div class="s-header">السرعة</div><div class="s-option" onclick="selectSpeed(this,0.5)">0.5x</div><div class="s-option selected" onclick="selectSpeed(this,1)">Normal</div><div class="s-option" onclick="selectSpeed(this,1.25)">1.25x</div><div class="s-option" onclick="selectSpeed(this,1.5)">1.5x</div><div class="s-option" onclick="selectSpeed(this,2)">2x</div>`;
+    wrapper.appendChild(sMenu);
+    }
+
+    if (controls) {
+    const fullscreenBtn = controls.querySelector('[data-plyr="fullscreen"]');
+    if (!controls.querySelector('#btnSpeed')) {
+    const speedBtn = document.createElement('button');
+    speedBtn.id = 'btnSpeed'; speedBtn.className = 'plyr__controls__item plyr__control custom-bottom-btn';
+    speedBtn.innerHTML = `<span>⚡</span> <span class="btn-text">1x</span>`;
+    speedBtn.onclick = function (e) {
+    e.stopPropagation();
+    const menu = wrapper.querySelector('.custom-speed-menu');
+    const btnRect = speedBtn.getBoundingClientRect(); const wrapperRect = wrapper.getBoundingClientRect();
+    menu.style.left = (btnRect.left - wrapperRect.left) + 'px';
+    menu.classList.toggle('hidden');
+    wrapper.querySelector('.custom-quality-menu').classList.add('hidden');
+    };
+    if (fullscreenBtn) controls.insertBefore(speedBtn, fullscreenBtn);
+    }
+    if (!controls.querySelector('#btnQuality')) {
+    const qualityBtn = document.createElement('button');
+    qualityBtn.id = 'btnQuality'; qualityBtn.className = 'plyr__controls__item plyr__control custom-bottom-btn';
+    qualityBtn.innerHTML = `<span style="font-size:18px">⚙️</span>`;
+    qualityBtn.onclick = function (e) {
+    e.stopPropagation();
+    const menu = wrapper.querySelector('.custom-quality-menu');
+    const btnRect = qualityBtn.getBoundingClientRect(); const wrapperRect = wrapper.getBoundingClientRect();
+    menu.style.left = (btnRect.left - wrapperRect.left) + 'px';
+    menu.classList.toggle('hidden');
+    wrapper.querySelector('.custom-speed-menu').classList.add('hidden');
+    };
+    if (fullscreenBtn) controls.insertBefore(qualityBtn, fullscreenBtn);
+    }
+    }
+
+    // ==========================================
+    // طبقة الحماية وبرمجة الدبل كليك (تجربة يوتيوب الأصلية)
+    // ==========================================
+    if (wrapper && !wrapper.querySelector('.gv-click-layer')) {
+        const clickLayer = document.createElement('div');
+        clickLayer.className = 'gv-click-layer';
+
+        const feedback = document.createElement('div');
+        feedback.className = 'seek-feedback';
+
+        wrapper.appendChild(feedback);
+        wrapper.appendChild(clickLayer);
+
+        let lastClickTime = 0;
+
+        // عزل حدث الدبل كليك الافتراضي للمتصفح
+        clickLayer.addEventListener('dblclick', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+        });
+
+        // التحكم المخصص الذكي
+        clickLayer.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const rect = clickLayer.getBoundingClientRect();
+            const clickX = e.clientX - rect.left;
+            const clickY = e.clientY - rect.top;
+
+            // تحديد منطقة المنتصف بذكاء لتناسب الموبايل (60% من العرض و 70% من الارتفاع)
+            const isCenter = (
+                clickX >= rect.width * 0.20 && clickX <= rect.width * 0.80 && 
+                clickY >= rect.height * 0.15 && clickY <= rect.height * 0.85
+            );
+
+            const currentTime = new Date().getTime();
+            const timeDiff = currentTime - lastClickTime;
+
+            // 1. نظام الدبل كليك (للتقديم والتأخير على الأطراف)
+            if (timeDiff < 300 && timeDiff > 0) {
+                lastClickTime = 0; // تصفير العداد
+                
+                if (!isCenter) {
+                    if (clickX > rect.width / 2) {
+                        player.forward(10);
+                        feedback.style.left = 'auto'; feedback.style.right = '15%'; feedback.innerHTML = '▶▶ +10s';
+                    } else {
+                        player.rewind(10);
+                        feedback.style.right = 'auto'; feedback.style.left = '15%'; feedback.innerHTML = '-10s ◀◀';
+                    }
+                    feedback.classList.remove('show');
+                    void feedback.offsetWidth;
+                    feedback.classList.add('show');
+                    setTimeout(() => feedback.classList.remove('show'), 500);
+                }
+                return; // نوقف التنفيذ هنا عشان الدبل كليك ميتحسبش ضغطة عادية
+            }
+
+            lastClickTime = currentTime;
+
+            // 2. نظام الضغطة الواحدة الذكي (الاستيقاظ ثم التشغيل)
+            
+            // هل الأزرار مخفية حالياً؟
+            const isControlsHidden = wrapper.classList.contains('plyr--hide-controls');
+
+            if (isControlsHidden) {
+                // الضغطة الأولى: إظهار الأزرار المخفية فقط (إيقاظ المشغل)
+                player.toggleControls(true); 
+            } else {
+                // الضغطة الثانية (والأزرار ظاهرة بالفعل):
+                if (isCenter) {
+                    // لو داس في النص -> نشغل/نوقف الفيديو
+                    player.togglePlay();
+                    // تشغيل الصوت فوراً لأقصى درجة مهما حصل
+                    player.muted = false; 
+                    player.volume = 1;
+                } else {
+                    // لو داس على الأطراف -> نخفي الأزرار تاني
+                    player.toggleControls(false); 
+                }
+            }
+        });
+    }
+
+    // إنشاء شاشة النهاية الأنيقة
+    if (wrapper && !wrapper.querySelector('.gv-end-screen')) {
+    const firstName = currentUserData.name ? currentUserData.name.split(' ')[0] : 'بطل';
+    const endScreen = document.createElement('div');
+    endScreen.className = 'gv-end-screen';
+    endScreen.innerHTML = `
+    <div class="gv-end-screen-content">
+    <h3 style="color: var(--accent); font-weight: 900; font-size: 1.8rem; margin-bottom: 12px; font-family: 'Tajawal', sans-serif;">انتهت المحاضرة 🎓</h3>
+    <p style="color: var(--text-muted); font-size: 1rem; margin-bottom: 24px; font-weight: bold; font-family: 'Cairo', sans-serif;">عاش المجهود يا ${firstName}.. جاهز للي بعده؟</p>
+    <button onclick="player.restart()" style="background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #000; font-weight: 900; font-size: 1rem; padding: 12px 30px; border-radius: 14px; border: none; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 10px 20px rgba(0, 229, 255, 0.2);" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">إعادة التشغيل 🔄</button>
+    </div>
+    `;
+    wrapper.appendChild(endScreen);
+    }
+
+    document.addEventListener('click', function (e) {
+    const wrapper2 = document.querySelector('.plyr');
+    if (!wrapper2) return;
+    const qMenu = wrapper2.querySelector('.custom-quality-menu');
+    const sMenu = wrapper2.querySelector('.custom-speed-menu');
+    if (qMenu && !qMenu.contains(e.target)) qMenu.classList.add('hidden');
+    if (sMenu && !sMenu.contains(e.target)) sMenu.classList.add('hidden');
+    });
+
+    // ضمان بقاء العلامة المائية في وضع الشاشة الكاملة
+    player.on('enterfullscreen', () => {
+    const wm = document.getElementById('watermark');
+    const pc = document.querySelector('.plyr');
+    if (wm && pc) {
+    pc.appendChild(wm);
+    }
+    const volumeContainer = document.querySelector('.plyr__volume');
+    if (volumeContainer) volumeContainer.style.display = 'block'; // يظهر في الممتلئ
+    });
+
+    player.on('exitfullscreen', () => {
+    const wm = document.getElementById('watermark');
+    const pc = document.getElementById('gv-playerContainer');
+    if (wm && pc) {
+    pc.appendChild(wm);
+    }
+    const volumeContainer = document.querySelector('.plyr__volume');
+    if (volumeContainer) volumeContainer.style.display = 'none'; // يختفي في المصغر
+    });
+    });
+
+    // 🚀 GA4 Tracking Variables
+    let _ga_video_started = false;
+
+    // ==========================================
+    // 🚀 نظام التتبع اللحظي الذكي الشامل (النسخة الاحترافية)
+    // ==========================================
+    if (window._sheetSyncInterval) clearInterval(window._sheetSyncInterval);
+
+    // إنشاء ID فريد لهذه الجلسة
+    const currentSessionId = Date.now() + '-' + Math.random().toString(36).substring(2, 9);
+
+    function syncToSheet(status) {
+    // رابط الـ Web App الخاص بك
+    const scriptUrl = "https://script.google.com/macros/s/AKfycbzNtf1DThA_XdliarE2gy8yEn2ZXTRyyLnHOzXFXMoUHg6QxElaGwOYJeTk7WTjjx_uqQ/exec";
+
+    const data = {
+    student_name: currentUserData.name || "مجهول",
+    course_id: courseId || "غير محدد",
+    video_title: _v5_currentVideoTitle || "غير محدد",
+    status: status,
+    current_time: player ? Math.floor(player.currentTime) : 0,
+    duration: player ? Math.floor(player.duration) : 0,
+    playback_speed: player ? player.speed : 1, // ⚡ لقط سرعة التشغيل
+    user_agent: navigator.userAgent,
+    session_id: currentSessionId
+    };
+
+    fetch(scriptUrl, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(data)
+    }).catch(err => console.error("Sheet Sync Error:", err));
+    }
+
+    // 1. عند التشغيل
+    player.on('play', () => {
+    // إخفاء شاشة النهاية عند التشغيل
+    const endScreen = document.querySelector('.gv-end-screen');
+    if (endScreen) endScreen.classList.remove('show');
+    if (!_ga_video_started) {
+    gtag('event', 'video_start', {
+    'video_id': videoId,
+    'video_title': title,
+    'course_id': courseId,
+    'student_name': currentUserData.name
+    });
+    _ga_video_started = true;
+    }
+
+    syncToSheet('بدأ المشاهدة ▶️');
+    if (window._sheetSyncInterval) clearInterval(window._sheetSyncInterval);
+    window._sheetSyncInterval = setInterval(() => {
+    syncToSheet('يشاهد الآن 👀');
+    }, 10000);
+    });
+
+    player.on('ready', () => {
+    _ga_video_started = false;
+    });
+
+    player.on('timeupdate', () => {
+    if (_v5_currentChapters.length === 0) return;
+    const cTime = player.currentTime;
+    let foundIndex = -1;
+    for (let i = 0; i < _v5_currentChapters.length; i++) {
+    if (cTime >= _v5_currentChapters[i].time) {
+    foundIndex = i;
+    } else {
+    break; // توقف عند الوصول لجزء وقته أكبر من الوقت الحالي
+    }
+    }
+    if (foundIndex !== -1) {
+    updateActiveChapter(foundIndex);
+    }
+    });
+
+    // 2. عند الإيقاف المؤقت
+    player.on('pause', () => {
+    syncToSheet('أوقف الفيديو مؤقتاً ⏸️');
+    if (window._sheetSyncInterval) clearInterval(window._sheetSyncInterval);
+    });
+
+    // 3. عند تغيير سرعة التشغيل (لتسجيل السرعة الجديدة فوراً)
+    player.on('ratechange', () => {
+    syncToSheet('تغيير السرعة ⚡');
+    });
+
+    // 4. عند الانتهاء
+    player.on('ended', () => {
+    // إظهار شاشة النهاية وحجب مقترحات يوتيوب
+    const endScreen = document.querySelector('.gv-end-screen');
+    if (endScreen) endScreen.classList.add('show');
+    gtag('event', 'video_complete', {
+    'video_id': videoId,
+    'video_title': title,
+    'course_id': courseId,
+    'student_name': currentUserData.name
+    });
+
+    syncToSheet('أكمل الفيديو للاخر ✅');
+    if (window._sheetSyncInterval) clearInterval(window._sheetSyncInterval);
+
+    // دالة تسجيل الاكتمال في قاعدة البيانات (Supabase)
+    markVideoAsWatched(videoId);
+    });
+    // ==========================================
+
+    enableJumpingWatermark();
+    };
+
+    window.selectQuality = (el, quality) => {
+    document.querySelectorAll('.q-option').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+    document.querySelector('.custom-quality-menu').classList.add('hidden');
+    Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 1500 }).fire({ icon: 'success', title: `جودة ${quality}` });
+    };
+    window.selectSpeed = (el, speed) => {
+    if (player) player.speed = speed;
+    document.querySelectorAll('.s-option').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+    document.querySelector('.custom-speed-menu').classList.add('hidden');
+    const btnText = document.querySelector('#btnSpeed .btn-text');
+    if (btnText) btnText.textContent = speed === 1 ? '1x' : speed + 'x';
+    };
+
+    // ═══════════════════════════════════════════════════════
+    // 6. JUMPING WATERMARK — مصغّر + مستطيل شفاف داكن + دايماً ظاهر
+    // ═══════════════════════════════════════════════════════
+    function enableJumpingWatermark() {
+    if (watermarkInterval) clearInterval(watermarkInterval);
+    setTimeout(() => {
+    const pc = document.querySelector('.plyr') || document.getElementById('gv-playerContainer');
+    if (!pc) return;
+    let wm = document.getElementById('watermark');
+    if (!wm) { wm = document.createElement('div'); wm.id = 'watermark'; pc.appendChild(wm); }
+
+    const name = currentUserData.name || 'طالب';
+    // آخر 4 أرقام فقط من التليفون لحماية الخصوصية مع الحفظ بالهوية
+    const phone = currentUserData.phone
+    ? String(currentUserData.phone)
+    : '';
+
+    wm.innerHTML = `${name}${phone ? '<br>' + phone : ''}`;
+    pc.style.position = 'relative';
+
+    const jump = () => {
+    const w = pc.offsetWidth || 400;
+    const h = pc.offsetHeight || 225;
+    const wmW = wm.offsetWidth || 130;
+    const wmH = wm.offsetHeight || 28;
+    wm.style.left = Math.floor(Math.random() * Math.max(w - wmW - 20, 20)) + 'px';
+    wm.style.top = Math.floor(Math.random() * Math.max(h - wmH - 20, 10)) + 'px';
+    };
+
+    jump();
+    watermarkInterval = setInterval(jump, 5000);
+    }, 800);
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // 7. V5 SMART BUTTONS
+    // ═══════════════════════════════════════════════════════
+    function _v5_markCurrentDone() {
+    if (!_v5_currentVideoId) return;
+    markVideoAsWatched(_v5_currentVideoId);
+    const btn = document.getElementById('_v5_doneBtn');
+    if (btn) { btn.classList.add('done'); btn.innerHTML = '✅ تم تسجيل الإنهاء!'; btn.disabled = true; }
+    Swal.mixin({ toast: true, position: 'bottom-end', showConfirmButton: false, timer: 2500 }).fire({ icon: 'success', title: '🎉 تم تسجيل إنهاء الدرس!' });
+    }
+
+    function _v5_toggleFav() {
+    if (!_v5_currentVideoId) return;
+    let favs = []; try { favs = JSON.parse(localStorage.getItem('_v5_favs') || '[]'); } catch (e) { }
+    const idx = favs.indexOf(_v5_currentVideoId);
+    const btn = document.getElementById('_v5_favBtn');
+    if (idx === -1) {
+    favs.push(_v5_currentVideoId);
+    if (btn) { btn.textContent = '💔 إزالة من المفضلة'; btn.classList.add('fav-active'); }
+    Swal.mixin({ toast: true, position: 'bottom-end', showConfirmButton: false, timer: 1800 }).fire({ icon: 'success', title: '❤️ أُضيف للمفضلة' });
+    } else {
+    favs.splice(idx, 1);
+    if (btn) { btn.textContent = '❤️ المفضلة'; btn.classList.remove('fav-active'); }
+    Swal.mixin({ toast: true, position: 'bottom-end', showConfirmButton: false, timer: 1800 }).fire({ icon: 'info', title: '💔 أُزيل من المفضلة' });
+    }
+    localStorage.setItem('_v5_favs', JSON.stringify(favs));
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // 9. LOAD PLAYER CONTENT
+    // ═══════════════════════════════════════════════════════
+    async function loadPlayerContent() {
+    try {
+    const { data: { user } } = await window.supabase.auth.getUser();
+    if (!user) { window.location.href = 'login.html'; return; }
+
+    const { data: p } = await window.supabase.from('profiles').select('*').eq('id', user.id).single();
+    if (p) {
+    document.getElementById('gv-userName').textContent = `مرحباً، ${p.full_name}`;
+    currentUserData = { name: p.full_name, phone: p.phone, email: user.email };
+
+    // 🚀 GA4 User Identification
+    gtag('config', 'G-3KPK3NB6X1', {
+    'user_id': user.id,
+    'user_properties': {
+    'student_name': p.full_name
+    }
+    });
+    }
+
+    if (!courseId) {
+    document.getElementById('gv-loading').classList.add('hidden');
+    document.getElementById('gv-lessonList').innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:24px;font-size:0.85rem;">لم يتم تحديد كورس. ارجع للكورسات.</p>';
+    return;
+    }
+
+    const { data: course } = await window.supabase.from('courses').select('*').eq('id', courseId).single();
+    if (course) {
+    document.title = `${course.title} — أ. محمد زايد`;
+    document.getElementById('gv-orbit-title').textContent = course.title;
+    if (course.image_url) {
+    document.getElementById('gv-bg-img').style.backgroundImage = `url(${course.image_url})`;
+    }
+    }
+
+    const { data: enroll } = await window.supabase.from('enrollments').select('course_id').eq('student_id', user.id);
+    const enrolledIds = enroll ? enroll.map(e => e.course_id) : [];
+    const isUnlocked = course?.is_free || enrolledIds.includes(courseId);
+
+    if (!isUnlocked) {
+    document.getElementById('gv-loading').classList.add('hidden');
+    document.getElementById('gv-lessonList').innerHTML = `<div style="text-align:center;padding:32px;color:var(--text-muted);">
+    <div style="font-size:2.5rem;margin-bottom:12px;">🔒</div>
+    <p style="font-weight:700;margin-bottom:8px;">محتوى مدفوع</p>
+    <p style="font-size:0.8rem;">اشترك في الكورس من صفحة الكورسات</p>
+    <a href="course.html" style="display:inline-block;margin-top:14px;padding:10px 22px;background:linear-gradient(135deg,var(--accent2),var(--accent));color:#000;font-weight:800;border-radius:12px;text-decoration:none;font-size:0.85rem;">الذهاب للكورسات</a>
+    </div>`;
+    return;
+    }
+
+    const { data: vids } = await window.supabase.from('videos').select('*').eq('course_id', courseId).order('order_index', { ascending: true });
+
+    const { data: watched } = await window.supabase.from('video_progress').select('video_id').eq('user_id', user.id);
+    const watchedSet = new Set((watched || []).map(w => w.video_id));
+
+    const lessonListEl = document.getElementById('gv-lessonList');
+    if (!vids || vids.length === 0) {
+    lessonListEl.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:24px;font-size:0.85rem;">لا يوجد دروس بعد.</p>';
+    document.getElementById('gv-loading').classList.add('hidden');
+    return;
+    }
+
+    // ══════════════════════════════════════════════
+    // 🔐 تخزين بيانات الفيديوهات في _videoStore
+    //    الـ HTML يحتوي على data-vid فقط — بدون URLs
+    // ══════════════════════════════════════════════
+    vids.forEach(v => {
+    _videoStore.set(v.id, {
+    url: v.video_url,
+    type: v.source_type,
+    title: v.title || '',
+    desc: v.description || '',
+    pdf: v.attachment_url || v.pdf_url || '',
+    chapters: v.chapters_json || []
+    });
+    });
+
+    lessonListEl.innerHTML = vids.map((v, idx) => {
+    const isWatched = watchedSet.has(v.id);
+    const isActive = v.id === initVideoId;
+    let statusText = isWatched ? 'مكتمل' : (isActive ? 'قيد المشاهدة' : 'لم يُشاهد');
+    let statusColor = isWatched ? 'var(--green)' : (isActive ? 'var(--accent)' : 'var(--text-muted)');
+    let iconText = isWatched ? '✅' : (isActive ? '▶' : '○');
+    let cls = isWatched ? 'watched' : (isActive ? 'active' : '');
+
+    // 🔐 data-vid فقط — بدون data-url أو data-pdf
+    return `<div class="gv-lesson-item ${cls}" data-vid="${v.id}"
+    onclick="playVideoById('${v.id}')">
+    <div class="gv-li-line"></div>
+    <div class="gv-li-inner">
+    <div style="flex:1;">
+    <span class="gv-li-status" style="color:${statusColor};">${statusText}</span>
+    <span class="gv-li-title">${String(idx + 1).padStart(2, '0')}. ${v.title}</span>
+    ${v.duration ? `<span style="font-size:0.68rem;color:var(--text-muted);display:block;margin-top:2px;">⏱ ${v.duration}</span>` : ''}
+    </div>
+    <span class="gv-li-icon">${iconText}</span>
+    </div>
+    </div>`;
+    }).join('');
+
+    document.getElementById('gv-loading').classList.add('hidden');
+
+    if (!course?.image_url && vids.length > 0) {
+    const firstYt = vids.find(v => v.source_type === 'youtube');
+    if (firstYt) {
+    const bgId = (firstYt.video_url.split('v=')[1] || firstYt.video_url.split('/').pop()).split('&')[0];
+    document.getElementById('gv-bg-img').style.backgroundImage = `url(https://img.youtube.com/vi/${bgId}/maxresdefault.jpg)`;
+    }
+    }
+
+    // Auto-play
+    if (initVideoId) {
+    const targetVid = vids.find(v => v.id === initVideoId);
+    if (targetVid) {
+    setTimeout(() => playVideoById(initVideoId), 500);
+    }
+    } else if (vids.length > 0) {
+    setTimeout(() => playVideoById(vids[0].id), 500);
+    }
+
+    calculateStudentProgress();
+
+    } catch (err) {
+    console.error('Player Load Error:', err);
+    document.getElementById('gv-loading').classList.add('hidden');
+    }
+    }
+
+    function renderChapters(chaptersArray) {
+    const section = document.getElementById('gv-chapters-section');
+    const container = document.getElementById('chaptersGrid');
+
+    if (!chaptersArray || chaptersArray.length === 0) {
+    section.style.display = 'none';
+    _v5_currentChapters = [];
+    return;
+    }
+
+    _v5_currentChapters = chaptersArray;
+    section.style.display = 'block';
+
+    container.innerHTML = _v5_currentChapters.map((ch, index) => {
+    const words = ch.title.trim().split(' ');
+    const firstWord = words.shift() || '';
+    const restOfTitle = words.join(' ') || '';
+
+    return `
+    <div class="chapter-card" id="chapter-card-${index}" onclick="seekToChapter(${index})">
+    <span class="chapter-time">${ch.label || '00:00'}</span>
+    <div class="chapter-title">
+    <span class="fw-accent">${firstWord}</span>
+    ${restOfTitle ? `<span class="fw-rest"> ${restOfTitle}</span>` : ''}
+    </div>
+    </div>
+    `;
+    }).join('');
+
+    _v5_activeChapterIndex = -1;
+    }
+
+    window.seekToChapter = function (index) {
+    if (!player || !_v5_currentChapters[index]) return;
+    player.currentTime = _v5_currentChapters[index].time;
+    player.play();
+    updateActiveChapter(index);
+    };
+
+    window._v5_nextChapter = function () {
+    if (_v5_activeChapterIndex < _v5_currentChapters.length - 1) {
+    seekToChapter(_v5_activeChapterIndex + 1);
+    }
+    };
+
+    window._v5_prevChapter = function () {
+    if (_v5_activeChapterIndex > 0) {
+    seekToChapter(_v5_activeChapterIndex - 1);
+    }
+    };
+
+    function updateActiveChapter(index) {
+    if (_v5_activeChapterIndex === index) return;
+    _v5_activeChapterIndex = index;
+    document.querySelectorAll('.chapter-card').forEach((card, i) => {
+    if (i === index) card.classList.add('active-part');
+    else card.classList.remove('active-part');
+    });
+    }
+
+    // 2. إضافة دوال الفضفضة والرسائل Secret
+    function openFeedbackModal() {
+        if (player) player.pause(); // إيقاف الفيديو مؤقتاً
+        const modal = document.getElementById('feedbackModal');
+        const content = document.getElementById('feedbackModalContent');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        setTimeout(() => { content.classList.remove('scale-90', 'opacity-0'); }, 10);
+    }
+
+    function closeFeedbackModal() {
+        const modal = document.getElementById('feedbackModal');
+        const content = document.getElementById('feedbackModalContent');
+        content.classList.add('scale-90', 'opacity-0');
+        setTimeout(() => { modal.classList.add('hidden'); modal.classList.remove('flex'); }, 300);
+    }
+
+    async function sendFeedbackToSupabase() {
+        const text = document.getElementById('feedbackText').value.trim();
+        if (!text) return Swal.fire({ icon: 'warning', text: 'يرجى كتابة رسالتك أولاً', background: '#0f172a', color: '#fff' });
+
+        const { data: { user } } = await window.supabase.auth.getUser();
+        if (!user) return;
+
+        Swal.fire({ title: 'جاري الإرسال...', allowOutsideClick: false, background: '#0f172a', didOpen: () => Swal.showLoading() });
+
+        // إرسال البيانات لـ Supabase (بدون توقيت الفيديو كما طلبت)
+        const { error } = await window.supabase.from('student_messages').insert([{
+            student_id: user.id,
+            course_id: courseId,
+            video_title: _v5_currentVideoTitle,
+            message: text
+        }]);
+
+        if (error) {
+            Swal.fire({ icon: 'error', title: 'خطأ', text: 'حدث خطأ أثناء الإرسال، حاول مرة أخرى.', background: '#0f172a', color: '#fff' });
+        } else {
+            document.getElementById('feedbackText').value = '';
+            closeFeedbackModal();
+            Swal.fire({ icon: 'success', title: 'تم الإرسال', text: 'رسالتك وصلت للمستر، وسيتم الرد عليك في الإشعارات قريباً!', background: '#0f172a', color: '#fff' });
+        }
+    }
+
+    // Init on load
+    loadPlayerContent();
+    </script>
+</body>
+
+</html>

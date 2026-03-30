@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Mohamed Zayed</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            bg: '#F5F7FA', sidebar: '#EAF4F6', active: '#FDE68A',
+                            textPrimary: '#1E293B', textSecondary: '#64748B', accent: '#0EA5E9',
+                        }
+                    },
+                    fontFamily: { sans: ['Cairo', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+
+    <script>
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        document.addEventListener('keydown', e => {
+            if (e.key === 'F12') e.preventDefault();
+            if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) e.preventDefault();
+            if (e.ctrlKey && e.key === 'u') e.preventDefault();
+        });
+    </script>
+
+    <style>
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        body {
+            margin: 0;
+            background-color: #F5F7FA;
+            font-family: 'Cairo', sans-serif;
+        }
+
+        .drag-item {
+            cursor: grab;
+            transition: all 0.2s;
+        }
+
+        .drag-item:active {
+            cursor: grabbing;
+        }
+
+        .is-dragging {
+            opacity: 0.5;
+            background: #FDE68A;
+            transform: scale(0.98);
+            border: 1px dashed #0EA5E9;
+        }
+
+        .glowing-text {
+            text-shadow: 0 0 10px rgba(52, 211, 153, 0.8), 0 0 20px rgba(52, 211, 153, 0.6);
+        }
+    </style>
+</head>
+
+<body class="min-h-screen p-2 md:p-6 flex justify-center items-center bg-[#F5F7FA]">
+    <div id="root"
+        class="w-full max-w-[1440px] h-[96vh] md:h-[92vh] bg-white md:rounded-3xl shadow-2xl flex flex-col md:flex-row overflow-hidden border border-gray-200 relative">
+    </div>
+
+    <script type="text/babel">
+        const { useState, useEffect, Fragment, useRef } = React;
+        const supabase = window.supabase;
+
+        const Icon = ({ path, size = 18, className = "" }) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d={path} /></svg>
+        );
+
+        const paths = {
+            dashboard: "M3 3h7v7H3z M14 3h7v7h-7z M14 14h7v7h-7z M3 14h7v7H3z",
+            list: "M8 6h13 M8 12h13 M8 18h13 M3 6h.01 M3 12h.01 M3 18h.01",
+            calendar: "M3 4v16a2 2 0 002 2h14a2 2 0 002-2V4a2 2 0 00-2-2H5a2 2 0 00-2 2z M16 2v4 M8 2v4 M3 10h18",
+            bed: "M2 4v16 M2 8h18a2 2 0 012 2v10 M2 17h20 M6 8v9",
+            user: "M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2 M12 11a4 4 0 100-8 4 4 0 000 8z",
+            sparkles: "M12 3v18 M3 12h18 M16.24 7.76l-8.48 8.48 M7.76 7.76l8.48 8.48",
+            search: "M11 19a8 8 0 100-16 8 8 0 000 16z M21 21l-4.35-4.35",
+            trash: "M3 6h18 M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2",
+            drag: "M4 8h16 M4 16h16",
+            ban: "M12 2a10 10 0 100 20 10 10 0 000-20z M4.93 4.93l14.14 14.14",
+            logout: "M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4 M16 17l5-5-5-5 M21 12H9",
+            wallet: "M20 4H4a2 2 0 00-2 2v12a2 2 0 002 2h16a2 2 0 002-2V6a2 2 0 00-2-2z M16 12h4",
+            star: "M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z",
+            bell: "M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9 M13.73 21a2 2 0 01-3.46 0",
+        };
+
+        const Sidebar = ({ activeTab, setActiveTab, isMobileOpen, setIsMobileOpen }) => {
+            const navItems = [
+                { id: 'dashboard', name: 'الرئيسية والإحصائيات', icon: paths.dashboard },
+                { id: 'content', name: 'إدارة المحتوى', icon: paths.bed },
+                { id: 'activation', name: 'التفعيل المتعدد', icon: paths.calendar },
+                { id: 'students', name: 'شئون الطلاب', icon: paths.user },
+                { id: 'codes', name: 'مولد الأكواد', icon: paths.sparkles },
+                { id: 'history', name: 'سجل الأكواد الشامل', icon: paths.list },
+                { id: 'notifications', name: 'نظام الإشعارات', icon: paths.bell },
+                { id: 'messages', name: 'رسائل وصندوق الفضفضة', icon: paths.star },
+            ];
+
+            const handleLogout = async () => { await supabase.auth.signOut(); window.location.replace('index.html'); };
+            const handlePreview = () => { window.open('index.html', '_blank'); };
+
+            return (
+                <Fragment>
+                    {/* خلفية سوداء شفافة للموبايل */}
+                    {isMobileOpen && <div className="fixed inset-0 bg-black/50 z-40 md:hidden" onClick={() => setIsMobileOpen(false)}></div>}
+
+                    <aside className={`fixed md:static inset-y-0 right-0 w-64 bg-brand-sidebar h-full p-4 flex flex-col border-l border-gray-200 shrink-0 z-50 transform transition-transform duration-300 ${isMobileOpen ? 'translate-x-0' : 'translate-x-full md:translate-x-0'}`}>
+                        <div className="flex items-center justify-between mb-8 px-2 mt-2">
+                            <div className="flex items-center gap-2">
+                                <div className="text-xl font-black text-blue-900 tracking-tighter">Admin Panel</div>
+                                <div className="w-2.5 h-2.5 rounded-full bg-yellow-400 mt-2"></div>
+                            </div>
+                            <button className="md:hidden text-gray-500" onClick={() => setIsMobileOpen(false)}>✕</button>
+                        </div>
+                        <nav className="flex flex-col gap-1 overflow-y-auto flex-1">
+                            {navItems.map((item) => (
+                                <button key={item.id} onClick={() => { setActiveTab(item.id); setIsMobileOpen(false); }} className={`flex items-center w-full px-4 py-3 rounded-xl transition-all duration-200 ${activeTab === item.id ? 'bg-brand-active text-gray-900 font-bold shadow-sm' : 'text-gray-500 hover:bg-gray-100 hover:text-gray-800 font-semibold'}`}>
+                                    <Icon path={item.icon} size={20} className={`ml-3 ${activeTab === item.id ? 'text-gray-800' : 'text-gray-400'}`} />
+                                    <span className="text-sm">{item.name}</span>
+                                </button>
+                            ))}
+                        </nav>
+                        <div className="mt-auto pt-4 border-t border-gray-200 space-y-1">
+                            <button onClick={handlePreview} className="flex items-center w-full px-4 py-3 rounded-xl transition-all text-gray-500 hover:bg-gray-100 font-semibold text-sm">
+                                <span>🌐 معاينة المنصة</span>
+                            </button>
+                            <button onClick={handleLogout} className="flex items-center w-full px-4 py-3 rounded-xl transition-all text-red-600 hover:bg-red-50 font-semibold text-sm">
+                                <Icon path={paths.logout} size={20} className="ml-3 text-red-500" />
+                                <span>تسجيل الخروج</span>
+                            </button>
+                        </div>
+                    </aside>
+                </Fragment>
+            );
+        };
+
+        // --- TopBar Component (Responsive) ---
+        const TopBar = ({ title, setIsMobileOpen }) => (
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 pb-4 border-b border-gray-200 gap-4">
+                <div className="flex items-center gap-4 w-full md:w-auto">
+                    <button className="md:hidden p-2 bg-white rounded-lg shadow" onClick={() => setIsMobileOpen(true)}>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 12h18M3 6h18M3 18h18" /></svg>
+                    </button>
+                    <h1 className="text-2xl md:text-3xl font-black text-brand-textPrimary">{title}</h1>
+                </div>
+                <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-end">
+                    <div className="relative hidden md:block">
+                        <Icon path={paths.search} size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                        <input type="text" placeholder="بحث سريع..." className="pr-10 pl-4 py-2.5 bg-white border border-gray-200 rounded-full text-sm outline-none focus:ring-2 focus:ring-brand-active w-64 shadow-sm font-semibold" />
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <div className="flex flex-col text-left">
+                            <span className="text-sm font-bold text-gray-800 leading-none">أ. محمد زايد</span>
+                            <span className="text-[10px] text-gray-500 mt-1 font-bold">مدير المنصة</span>
+                        </div>
+                        <div className="w-10 h-10 rounded-full bg-blue-100 border-2 border-brand-active flex items-center justify-center font-black text-blue-800">MZ</div>
+                    </div>
+                </div>
+            </div>
+        );
+
+        // --- Dashboard Tab (With Charts) ---
+        const DashboardTab = () => {
+            const [stats, setStats] = useState({ students: 0, courses: 0, codes: 0, revenue: 0 });
+            const chart1Ref = useRef(null);
+            const chart2Ref = useRef(null);
+
+            useEffect(() => {
+                async function fetchStats() {
+                    const { count: students } = await supabase.from('profiles').select('*', { count: 'exact', head: true });
+                    const { count: courses } = await supabase.from('courses').select('*', { count: 'exact', head: true });
+                    const { count: codes } = await supabase.from('coupon_codes').select('*', { count: 'exact', head: true }).eq('is_used', true);
+                    setStats({ students: students || 0, courses: courses || 0, codes: codes || 0, revenue: (codes || 0) * 250 });
+
+                    // رسم البياني الدائري (حالة الأكواد)
+                    if (chart1Ref.current) {
+                        new Chart(chart1Ref.current, {
+                            type: 'doughnut',
+                            data: {
+                                labels: ['مستخدم بالكامل', 'ساري (جزئي)', 'لم يُستخدم'],
+                                datasets: [{ data: [codes || 0, Math.floor((codes || 0) / 2), 150], backgroundColor: ['#ef4444', '#f59e0b', '#10b981'], borderWidth: 0 }]
+                            },
+                            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { font: { family: 'Cairo' } } } } }
+                        });
+                    }
+
+                    // الرسم البياني الشريطي (تفاعل الطلاب)
+                    if (chart2Ref.current) {
+                        new Chart(chart2Ref.current, {
+                            type: 'bar',
+                            data: {
+                                labels: ['السبت', 'الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة'],
+                                datasets: [{ label: 'مشاهدات الفيديوهات', data: [65, 59, 80, 81, 56, 55, 40], backgroundColor: '#0EA5E9', borderRadius: 5 }]
+                            },
+                            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { font: { family: 'Cairo' } } } } }
+                        });
+                    }
+                }
+                fetchStats();
+            }, []);
+
+            return (
+                <div className="animate-fade-in mb-8">
+                    <TopBar title="الرئيسية والإحصائيات" setIsMobileOpen={() => { }} />
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5 mb-8">
+                        <div className="bg-white p-4 md:p-5 rounded-2xl border border-gray-100 shadow-sm flex flex-col justify-between">
+                            <h3 className="text-gray-500 text-xs md:text-sm font-bold flex justify-between items-center">إجمالي الطلاب <div className="bg-brand-sidebar p-2 rounded-lg"><Icon path={paths.user} size={16} className="text-brand-accent" /></div></h3>
+                            <div className="mt-3 text-2xl md:text-3xl font-black text-brand-textPrimary tracking-tight">{stats.students}</div>
+                        </div>
+                        <div className="bg-white p-4 md:p-5 rounded-2xl border border-gray-100 shadow-sm flex flex-col justify-between">
+                            <h3 className="text-gray-500 text-xs md:text-sm font-bold flex justify-between items-center">إجمالي الكورسات <div className="bg-brand-sidebar p-2 rounded-lg"><Icon path={paths.bed} size={16} className="text-brand-accent" /></div></h3>
+                            <div className="mt-3 text-2xl md:text-3xl font-black text-brand-textPrimary tracking-tight">{stats.courses}</div>
+                        </div>
+                        <div className="bg-white p-4 md:p-5 rounded-2xl border border-gray-100 shadow-sm flex flex-col justify-between">
+                            <h3 className="text-gray-500 text-xs md:text-sm font-bold flex justify-between items-center">الأكواد المحجوزة <div className="bg-brand-sidebar p-2 rounded-lg"><Icon path={paths.star} size={16} className="text-brand-accent" /></div></h3>
+                            <div className="mt-3 text-2xl md:text-3xl font-black text-brand-textPrimary tracking-tight">{stats.codes}</div>
+                        </div>
+                        <div className="bg-white p-4 md:p-5 rounded-2xl border border-gray-100 shadow-sm flex flex-col justify-between">
+                            <h3 className="text-gray-500 text-xs md:text-sm font-bold flex justify-between items-center">المبيعات التقريبية <div className="bg-brand-sidebar p-2 rounded-lg"><Icon path={paths.wallet} size={16} className="text-brand-accent" /></div></h3>
+                            <div className="mt-3 text-2xl md:text-3xl font-black text-brand-textPrimary tracking-tight">{stats.revenue.toLocaleString()} ج</div>
+                        </div>
+                    </div>
+
+                    {/* منطقة الرسوم البيانية */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm col-span-1 md:col-span-2">
+                            <h3 className="font-bold text-gray-700 mb-4">📈 معدل تفاعل الطلاب هذا الأسبوع</h3>
+                            <div className="h-64"><canvas ref={chart2Ref}></canvas></div>
+                        </div>
+                        <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
+                            <h3 className="font-bold text-gray-700 mb-4">🎟️ حالة أكواد المنصة</h3>
+                            <div className="h-64"><canvas ref={chart1Ref}></canvas></div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+        // --- Tab 2: Content Management (Advanced) ---
+        const ContentTab = () => {
+            const [courses, setCourses] = useState([]);
+            const [videos, setVideos] = useState([]);
+            const [selectedCourseForVideos, setSelectedCourseForVideos] = useState('');
+            const [newCourse, setNewCourse] = useState({ title: '', price: '', is_free: false });
+            const [newVideo, setNewVideo] = useState({ course_id: '', title: '', source_type: 'youtube', video_url: '', pdf_url: '' });
+
+            // Refs للترتيب
+            const dragItem = useRef();
+            const dragOverItem = useRef();
+            const dragCourseItem = useRef();
+            const dragCourseOverItem = useRef();
+
+            const fetchCourses = async () => {
+                const { data } = await supabase.from('courses').select('*').order('order_index', { ascending: true });
+                if (data) setCourses(data);
+            };
+
+            const fetchVideos = async (courseId) => {
+                if (!courseId) { setVideos([]); return; }
+                const { data } = await supabase.from('videos').select('*').eq('course_id', courseId).order('order_index', { ascending: true });
+                if (data) setVideos(data);
+            };
+
+            useEffect(() => { fetchCourses(); }, []);
+            useEffect(() => { fetchVideos(selectedCourseForVideos); }, [selectedCourseForVideos]);
+
+            // --- دوال الكورسات ---
+            const handleAddCourse = async (e) => {
+                e.preventDefault();
+                if (!newCourse.title) return Swal.fire({ icon: 'warning', text: 'يرجى كتابة اسم الكورس' });
+                const lastOrder = courses.length > 0 ? courses[courses.length - 1].order_index : 0;
+                await supabase.from('courses').insert([{ title: newCourse.title, price: newCourse.price || 0, is_free: newCourse.is_free, order_index: lastOrder + 1 }]);
+                Swal.fire({ icon: 'success', title: 'نجاح', text: 'تم إضافة الكورس بنجاح!', timer: 1500, showConfirmButton: false });
+                setNewCourse({ title: '', price: '', is_free: false });
+                fetchCourses();
+            };
+
+            const handleDeleteCourse = async (id, title) => {
+                Swal.fire({
+                    title: 'تأكيد الحذف الجذري!',
+                    text: `سيتم حذف كورس "${title}" وكل الفيديوهات المرتبطة به! هل أنت متأكد؟`,
+                    icon: 'error',
+                    showCancelButton: true,
+                    confirmButtonText: 'نعم، دمر الكورس!',
+                    cancelButtonText: 'إلغاء',
+                    confirmButtonColor: '#ef4444'
+                }).then(async (result) => {
+                    if (result.isConfirmed) {
+                        await supabase.from('courses').delete().eq('id', id);
+                        fetchCourses();
+                        Swal.fire('تم الحذف', 'تم حذف الكورس بنجاح', 'success');
+                    }
+                });
+            };
+
+            const showCourseStudents = async (courseId, courseTitle) => {
+                Swal.fire({ title: 'جاري تحميل البيانات...', didOpen: () => Swal.showLoading() });
+                const { data: enrolls } = await supabase.from('enrollments').select('*, profiles(full_name, phone)').eq('course_id', courseId);
+
+                if (!enrolls || enrolls.length === 0) return Swal.fire('معلومة', 'لا يوجد طلاب مشتركين في هذا الكورس حتى الآن.', 'info');
+
+                let tableHtml = `<div class="max-h-64 overflow-y-auto mt-4"><table class="w-full text-right text-sm" dir="rtl">
+                    <thead class="bg-gray-100 sticky top-0"><tr class="text-gray-700"><th class="p-2">الاسم</th><th class="p-2">الهاتف</th><th class="p-2">الدفع</th></tr></thead><tbody>`;
+
+                enrolls.forEach(e => {
+                    let methodStr = e.payment_method === 'كود' ? '<span class="text-blue-500">كود</span>' :
+                        e.payment_method === 'أونلاين' ? '<span class="text-green-500">أونلاين</span>' :
+                            '<span class="text-yellow-600">يدوي</span>';
+                    tableHtml += `<tr class="border-b hover:bg-gray-50"><td class="p-2 font-bold">${e.profiles?.full_name || 'بدون اسم'}</td><td class="p-2 font-mono text-xs">${e.profiles?.phone || '-'}</td><td class="p-2 font-bold text-xs">${methodStr}</td></tr>`;
+                });
+                tableHtml += `</tbody></table></div>`;
+
+                Swal.fire({ title: `مشتركي: ${courseTitle}`, html: tableHtml, width: '600px', confirmButtonText: 'إغلاق', confirmButtonColor: '#1E293B' });
+            };
+
+            const dropCourse = async (e) => {
+                e.preventDefault(); e.target.classList.remove('is-dragging');
+                if (dragCourseItem.current === null || dragCourseOverItem.current === null) return;
+                const copyList = [...courses];
+                const itemContent = copyList[dragCourseItem.current];
+                copyList.splice(dragCourseItem.current, 1);
+                copyList.splice(dragCourseOverItem.current, 0, itemContent);
+                dragCourseItem.current = null; dragCourseOverItem.current = null;
+                setCourses(copyList);
+                for (let i = 0; i < copyList.length; i++) {
+                    await supabase.from('courses').update({ order_index: i + 1 }).eq('id', copyList[i].id);
+                }
+            };
+
+            // --- دوال الفيديوهات ---
+            const handleAddVideo = async (e) => {
+                e.preventDefault();
+                if (!newVideo.course_id || !newVideo.title || !newVideo.video_url) return Swal.fire({ icon: 'error', text: 'أكمل البيانات الأساسية للفيديو' });
+                const lastOrder = videos.length > 0 ? videos[videos.length - 1].order_index : 0;
+                await supabase.from('videos').insert([{ ...newVideo, order_index: lastOrder + 1 }]);
+                Swal.fire({ icon: 'success', text: 'تم رفع الفيديو', timer: 1500, showConfirmButton: false });
+                setNewVideo({ course_id: newVideo.course_id, title: '', source_type: 'youtube', video_url: '', pdf_url: '' });
+                fetchVideos(newVideo.course_id);
+            };
+
+            const dropVideo = async (e) => {
+                e.preventDefault(); e.target.classList.remove('is-dragging');
+                if (dragItem.current === null || dragOverItem.current === null) return;
+                const copyList = [...videos];
+                const itemContent = copyList[dragItem.current];
+                copyList.splice(dragItem.current, 1);
+                copyList.splice(dragOverItem.current, 0, itemContent);
+                dragItem.current = null; dragOverItem.current = null;
+                setVideos(copyList);
+                for (let i = 0; i < copyList.length; i++) {
+                    await supabase.from('videos').update({ order_index: i + 1 }).eq('id', copyList[i].id);
+                }
+            };
+
+            return (
+                <div className="animate-fade-in mb-8">
+                    <TopBar title="إدارة المحتوى" setIsMobileOpen={() => { }} />
+
+                    {/* قسم الكورسات (الإضافة والترتيب) */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+                            <h3 className="text-lg font-black mb-4 flex items-center gap-2"><Icon path={paths.bed} /> إضافة كورس جديد</h3>
+                            <form onSubmit={handleAddCourse} className="space-y-4">
+                                <div className="flex items-center gap-4">
+                                    <input type="text" value={newCourse.title} onChange={e => setNewCourse({ ...newCourse, title: e.target.value })} placeholder="اسم الكورس" className="flex-1 p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-brand-active font-bold" />
+                                    <label className="flex items-center gap-2 bg-gray-50 border border-gray-200 p-3 rounded-xl cursor-pointer hover:border-brand-active">
+                                        <input type="checkbox" checked={newCourse.is_free} onChange={e => setNewCourse({ ...newCourse, is_free: e.target.checked })} className="w-5 h-5 accent-brand-accent" />
+                                        <span className="font-bold text-xs md:text-sm">مجاني؟</span>
+                                    </label>
+                                </div>
+                                <div className="flex gap-4">
+                                    <input type="number" disabled={newCourse.is_free} value={newCourse.price} onChange={e => setNewCourse({ ...newCourse, price: e.target.value })} placeholder={newCourse.is_free ? "مجاني" : "السعر"} className="flex-1 p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-brand-active font-bold disabled:opacity-50" />
+                                    <button type="submit" className="bg-gray-900 text-white font-bold rounded-xl px-4 md:px-8 hover:bg-gray-800 transition">حفظ الكورس</button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex flex-col max-h-[300px]">
+                            <h3 className="text-lg font-black mb-4 flex justify-between items-center text-brand-accent">
+                                إدارة وترتيب الكورسات
+                                <span className="text-[10px] bg-brand-active text-black px-2 py-1 rounded">اسحب للترتيب</span>
+                            </h3>
+                            <div className="space-y-2 overflow-y-auto flex-1 pr-2">
+                                {courses.map((c, idx) => (
+                                    <div key={c.id} onDragStart={(e) => { dragCourseItem.current = idx; e.target.classList.add('is-dragging'); }} onDragEnter={(e) => dragCourseOverItem.current = idx} onDragEnd={dropCourse} onDragOver={(e) => e.preventDefault()} draggable className="drag-item bg-gray-50 border border-gray-200 p-3 rounded-xl flex items-center justify-between">
+                                        <div className="flex items-center gap-2 overflow-hidden">
+                                            <Icon path={paths.drag} className="text-gray-400 shrink-0" size={14} />
+                                            <span className="font-bold text-gray-800 text-xs truncate max-w-[120px]">{c.title}</span>
+                                            {c.is_free && <span className="text-[9px] bg-green-100 text-green-700 px-1 rounded">مجاني</span>}
+                                        </div>
+                                        <div className="flex gap-1 shrink-0">
+                                            <button onClick={() => showCourseStudents(c.id, c.title)} title="مشتركي الكورس" className="text-blue-500 hover:bg-blue-50 p-1.5 rounded-lg"><Icon path={paths.user} size={14} /></button>
+                                            <button onClick={() => handleDeleteCourse(c.id, c.title)} title="حذف الكورس" className="text-red-500 hover:bg-red-50 p-1.5 rounded-lg"><Icon path={paths.trash} size={14} /></button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* قسم الفيديوهات */}
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+                        <div className="col-span-1 md:col-span-7 bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+                            <h3 className="text-lg font-black mb-4 flex items-center gap-2"><Icon path={paths.calendar} /> رفع فيديو وملحقاته</h3>
+                            <form onSubmit={handleAddVideo} className="space-y-4">
+                                <select value={newVideo.course_id} onChange={e => setNewVideo({ ...newVideo, course_id: e.target.value })} className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none font-bold">
+                                    <option value="">اختر الكورس...</option>
+                                    {courses.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}
+                                </select>
+                                <input type="text" value={newVideo.title} onChange={e => setNewVideo({ ...newVideo, title: e.target.value })} placeholder="عنوان الفيديو" className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none font-bold" />
+                                <div className="flex flex-col md:flex-row gap-4">
+                                    <select value={newVideo.source_type} onChange={e => setNewVideo({ ...newVideo, source_type: e.target.value })} className="w-full md:w-1/3 p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none font-bold">
+                                        <option value="youtube">يوتيوب</option><option value="direct">مباشر</option>
+                                    </select>
+                                    <input type="text" value={newVideo.video_url} onChange={e => setNewVideo({ ...newVideo, video_url: e.target.value })} placeholder="رابط الفيديو" className="w-full md:w-2/3 p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none font-bold" />
+                                </div>
+                                <input type="text" value={newVideo.pdf_url} onChange={e => setNewVideo({ ...newVideo, pdf_url: e.target.value })} placeholder="رابط الـ PDF (اختياري)" className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none font-bold" />
+                                <button type="submit" className="w-full bg-brand-accent text-white py-3 rounded-xl font-black text-lg shadow-lg shadow-blue-500/20 hover:bg-blue-600 transition">نشر الفيديو</button>
+                            </form>
+                        </div>
+
+                        <div className="col-span-1 md:col-span-5 bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+                            <h3 className="text-lg font-black mb-4 flex justify-between items-center">
+                                ترتيب الفيديوهات
+                                <select value={selectedCourseForVideos} onChange={e => setSelectedCourseForVideos(e.target.value)} className="text-xs bg-gray-100 p-2 rounded-lg outline-none font-bold max-w-[120px]">
+                                    <option value="">اختر الكورس</option>
+                                    {courses.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}
+                                </select>
+                            </h3>
+                            <div className="space-y-3 max-h-[300px] overflow-y-auto">
+                                {videos.length === 0 ? <p className="text-sm text-gray-400 text-center">لا توجد فيديوهات</p> : videos.map((item, index) => (
+                                    <div key={item.id} onDragStart={(e) => { dragItem.current = index; e.target.classList.add('is-dragging'); }} onDragEnter={(e) => dragOverItem.current = index} onDragEnd={dropVideo} onDragOver={(e) => e.preventDefault()} draggable className="drag-item bg-gray-50 border border-gray-200 p-4 rounded-xl flex items-center justify-between">
+                                        <div className="flex items-center gap-3 overflow-hidden">
+                                            <Icon path={paths.drag} className="text-gray-400 shrink-0" />
+                                            <span className="font-bold text-gray-800 text-sm truncate">{item.title}</span>
+                                        </div>
+                                        <button onClick={async () => {
+                                            if (confirm('حذف الفيديو؟')) {
+                                                await supabase.from('videos').delete().eq('id', item.id);
+                                                fetchVideos(selectedCourseForVideos);
+                                            }
+                                        }} className="text-red-500 hover:bg-red-50 p-2 rounded-lg shrink-0"><Icon path={paths.trash} size={16} /></button>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const ActivationTab = () => {
+            const [courses, setCourses] = useState([]);
+            const [students, setStudents] = useState([]);
+            const [selectedCourses, setSelectedCourses] = useState(new Set());
+            const [selectedStudents, setSelectedStudents] = useState(new Set());
+            const [searchTerm, setSearchTerm] = useState('');
+
+            useEffect(() => {
+                async function loadData() {
+                    const { data: cData } = await supabase.from('courses').select('id, title');
+                    if (cData) setCourses(cData);
+                    const { data: sData } = await supabase.from('profiles').select('id, full_name, phone').order('created_at', { ascending: false });
+                    if (sData) setStudents(sData);
+                }
+                loadData();
+            }, []);
+
+            const toggleCourse = (id) => { const newSet = new Set(selectedCourses); newSet.has(id) ? newSet.delete(id) : newSet.add(id); setSelectedCourses(newSet); };
+            const toggleStudent = (id) => { const newSet = new Set(selectedStudents); newSet.has(id) ? newSet.delete(id) : newSet.add(id); setSelectedStudents(newSet); };
+            const filteredStudents = students.filter(s => (s.full_name || '').toLowerCase().includes(searchTerm) || (s.phone || '').includes(searchTerm));
+
+            const handleExecute = async () => {
+                if (selectedCourses.size === 0 || selectedStudents.size === 0) return Swal.fire({ icon: 'warning', text: 'يرجى تحديد كورسات وطلاب أولاً' });
+                let enrollments = [];
+                selectedStudents.forEach(s_id => {
+                    selectedCourses.forEach(c_id => { enrollments.push({ student_id: s_id, course_id: c_id }); });
+                });
+                const { error } = await supabase.from('enrollments').upsert(enrollments, { onConflict: 'student_id, course_id' });
+                if (!error) {
+                    Swal.fire({ icon: 'success', title: 'عملية ناجحة', text: 'تم التفعيل بنجاح للجميع!', confirmButtonColor: '#10b981' });
+                    setSelectedStudents(new Set()); setSelectedCourses(new Set());
+                }
+            };
+
+            return (
+                <div className="animate-fade-in mb-8">
+                    <TopBar title="التفعيل اليدوي المتعدد" />
+                    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col h-[65vh]">
+                        <div className="p-5 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
+                            <h3 className="text-sm font-bold">تحديد الكورسات والطلاب ({selectedStudents.size} طالب محدد)</h3>
+                            <button onClick={handleExecute} className="bg-gray-900 text-white px-6 py-2 rounded-lg font-bold text-sm hover:bg-gray-800 shadow-lg">تنفيذ التفعيل الآن</button>
+                        </div>
+                        <div className="flex flex-1 overflow-hidden">
+                            <div className="w-1/3 border-l border-gray-100 p-5 overflow-y-auto bg-white">
+                                <h4 className="font-bold text-gray-500 mb-4 text-sm">1. اختر الكورسات (باقات)</h4>
+                                <div className="space-y-3">
+                                    {courses.map(c => (
+                                        <label key={c.id} className="flex items-center gap-3 p-3 border border-gray-200 rounded-xl cursor-pointer hover:border-brand-active transition">
+                                            <input type="checkbox" checked={selectedCourses.has(c.id)} onChange={() => toggleCourse(c.id)} className="w-5 h-5 accent-brand-accent" />
+                                            <span className="font-bold text-gray-800 text-sm">{c.title}</span>
+                                        </label>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="w-2/3 p-5 overflow-y-auto bg-[#FAFBFC]">
+                                <div className="flex justify-between items-center mb-4">
+                                    <div className="flex gap-2">
+                                        <button onClick={() => setSelectedStudents(new Set(filteredStudents.map(s => s.id)))} className="bg-brand-active text-yellow-900 px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm">تحديد الكل</button>
+                                        <button onClick={() => setSelectedStudents(new Set())} className="bg-red-100 text-red-600 px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm">إلغاء التحديد</button>
+                                    </div>
+                                    <input type="text" value={searchTerm} onChange={e => setSearchTerm(e.target.value.toLowerCase())} placeholder="بحث باسم الطالب..." className="text-xs border border-gray-200 rounded-lg px-3 py-2 w-56 outline-none focus:border-brand-active" />
+                                </div>
+                                <div className="grid grid-cols-2 gap-3">
+                                    {filteredStudents.map(s => (
+                                        <div key={s.id} onClick={() => toggleStudent(s.id)} className={`p-4 border rounded-xl flex items-center justify-between cursor-pointer transition ${selectedStudents.has(s.id) ? 'bg-brand-active/20 border-brand-active' : 'bg-white border-gray-200 hover:border-brand-active'}`}>
+                                            <div>
+                                                <p className="font-bold text-sm text-gray-900">{s.full_name || 'بدون اسم'}</p>
+                                                <p className="text-[10px] text-gray-500 font-mono mt-1">{s.phone || '-'}</p>
+                                            </div>
+                                            <input type="checkbox" checked={selectedStudents.has(s.id)} readOnly className="w-5 h-5 accent-brand-accent" />
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const StudentsTab = () => {
+            const [students, setStudents] = useState([]);
+            const [searchTerm, setSearchTerm] = useState('');
+
+            const fetchStudents = async () => {
+                const { data } = await supabase.from('profiles').select('*').order('created_at', { ascending: false });
+                if (data) setStudents(data);
+            };
+            useEffect(() => { fetchStudents(); }, []);
+
+            const toggleBan = async (id, currentStatus) => {
+                Swal.fire({
+                    title: currentStatus ? 'فك الحظر؟' : 'تأكيد الحظر؟',
+                    text: currentStatus ? "سيتمكن الطالب من الدخول مجدداً" : "سيتم طرد الطالب ومنعه من الدخول",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: currentStatus ? '#10b981' : '#ef4444',
+                    cancelButtonColor: '#64748b',
+                    confirmButtonText: 'نعم، نفذ!',
+                    cancelButtonText: 'إلغاء'
+                }).then(async (result) => {
+                    if (result.isConfirmed) {
+                        await supabase.from('profiles').update({ is_banned: !currentStatus }).eq('id', id);
+                        fetchStudents();
+                        Swal.fire({ icon: 'success', title: 'تمت العملية', timer: 1500, showConfirmButton: false });
+                    }
+                });
+            };
+
+            const logoutDevices = async (id) => {
+                Swal.fire({
+                    title: 'طرد الأجهزة؟',
+                    text: "سيتم إخراج الطالب من جميع الأجهزة المتصلة حالياً",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#ef4444',
+                    cancelButtonColor: '#64748b',
+                    confirmButtonText: 'نعم، اطرده',
+                    cancelButtonText: 'إلغاء'
+                }).then(async (result) => {
+                    if (result.isConfirmed) {
+                        await supabase.from('user_devices').delete().eq('user_id', id);
+                        Swal.fire({ icon: 'success', title: 'تم مسح الجلسات بنجاح', timer: 1500, showConfirmButton: false });
+                    }
+                });
+            };
+
+            const filtered = students.filter(s => (s.full_name || '').toLowerCase().includes(searchTerm) || (s.phone || '').includes(searchTerm));
+
+            return (
+                <div className="animate-fade-in mb-8">
+                    <TopBar title="شئون الطلاب المتقدمة" />
+                    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                        <div className="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                            <h3 className="text-sm font-bold">قائمة الطلاب</h3>
+                            <div className="relative">
+                                <Icon path={paths.search} size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                                <input type="text" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} placeholder="بحث بالاسم أو الهاتف..." className="text-xs border border-gray-200 rounded-lg pr-8 pl-3 py-2 outline-none w-64 focus:border-brand-active font-bold" />
+                            </div>
+                        </div>
+                        <div className="max-h-[500px] overflow-y-auto">
+                            <table className="w-full text-right text-[13px]">
+                                <thead className="bg-[#EAF4F6] text-gray-600 font-bold sticky top-0">
+                                    <tr>
+                                        <th className="px-5 py-4">اسم الطالب</th>
+                                        <th className="px-5 py-4">رقم الهاتف</th>
+                                        <th className="px-5 py-4">الحالة</th>
+                                        <th className="px-5 py-4">إجراءات الأمان</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="text-gray-700 font-semibold divide-y divide-gray-100">
+                                    {filtered.map(s => (
+                                        <tr key={s.id} className="hover:bg-gray-50 transition-colors">
+                                            <td className="px-5 py-4 text-gray-900">{s.full_name || 'بدون اسم'}</td>
+                                            <td className="px-5 py-4 font-mono text-gray-500">{s.phone || '-'}</td>
+                                            <td className="px-5 py-4">
+                                                <span className={`px-3 py-1.5 rounded-lg text-[11px] font-bold tracking-wide ${!s.is_banned ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                                                    {!s.is_banned ? 'نشط' : 'محظور'}
+                                                </span>
+                                            </td>
+                                            <td className="px-5 py-4 flex gap-2">
+                                                <button onClick={() => toggleBan(s.id, s.is_banned)} className="bg-gray-100 text-gray-600 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-gray-200 flex items-center gap-1"><Icon path={paths.ban} size={14} /> {!s.is_banned ? 'حظر' : 'فك الحظر'}</button>
+                                                <button onClick={() => logoutDevices(s.id)} className="bg-brand-sidebar text-blue-700 px-3 py-1.5 rounded-lg text-xs font-bold border border-blue-200 hover:bg-blue-100 flex items-center gap-1"><Icon path={paths.logout} size={14} /> طرد الأجهزة</button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+        const CodesTab = () => {
+            const [courses, setCourses] = useState([]);
+            const [selectedCourses, setSelectedCourses] = useState(new Set());
+            const [genMode, setGenMode] = useState('random');
+            const [codeCount, setCodeCount] = useState(10);
+            const [manualCodes, setManualCodes] = useState('');
+            const [generatedCodes, setGeneratedCodes] = useState([]);
+
+            useEffect(() => {
+                async function fetchCourses() {
+                    const { data } = await supabase.from('courses').select('id, title');
+                    if (data) setCourses(data);
+                }
+                fetchCourses();
+            }, []);
+
+            const toggleCourse = (id) => { const newSet = new Set(selectedCourses); newSet.has(id) ? newSet.delete(id) : newSet.add(id); setSelectedCourses(newSet); };
+
+            const handleGenerate = async () => {
+                if (selectedCourses.size === 0) return Swal.fire({ icon: 'warning', text: 'الرجاء اختيار كورس واحد على الأقل للباقة' });
+
+                const courseArr = Array.from(selectedCourses);
+                let newCodes = [];
+
+                if (genMode === 'random') {
+                    if (codeCount <= 0) return Swal.fire({ icon: 'error', text: 'أدخل عدد صحيح' });
+                    for (let i = 0; i < codeCount; i++) {
+                        newCodes.push({ code: Math.floor(100000000 + Math.random() * 900000000).toString(), course_ids: courseArr, course_id: courseArr[0] });
+                    }
+                } else {
+                    const lines = manualCodes.split('\n').map(l => l.trim()).filter(l => l);
+                    if (lines.length === 0) return Swal.fire({ icon: 'warning', text: 'لم تقم بإدخال أي أكواد!' });
+                    newCodes = lines.map(c => ({ code: c, course_ids: courseArr, course_id: courseArr[0] }));
+                }
+
+                const { data, error } = await supabase.from('coupon_codes').insert(newCodes).select();
+                if (!error && data) {
+                    setGeneratedCodes(data);
+                    Swal.fire({ icon: 'success', title: 'عملية ناجحة', text: 'تم تجهيز الأكواد بنجاح!', confirmButtonColor: '#10b981' });
+                    setManualCodes('');
+                } else {
+                    Swal.fire({ icon: 'error', title: 'خطأ', text: error.message });
+                }
+            };
+
+            const handleCopyCodes = () => {
+                if (generatedCodes.length === 0) return Swal.fire({ icon: 'info', text: 'لا توجد أكواد لنسخها!' });
+                navigator.clipboard.writeText(generatedCodes.map(c => c.code).join('\n'));
+                Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'تم نسخ الأكواد 📋', showConfirmButton: false, timer: 2000 });
+            };
+
+            return (
+                <div className="animate-fade-in mb-8">
+                    <TopBar title="مولد وإضافة الأكواد" />
+                    <div className="grid grid-cols-2 gap-8">
+                        <div className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm h-fit">
+                            <h3 className="font-black text-xl mb-6">🎟️ باقة الكورسات</h3>
+                            <div className="space-y-4">
+                                <div className="p-4 bg-gray-50 border border-gray-200 rounded-xl max-h-48 overflow-y-auto space-y-2">
+                                    <p className="text-xs font-bold text-gray-500 mb-2">حدد الكورسات التي سيشملها الكود:</p>
+                                    {courses.map(c => (
+                                        <label key={c.id} className="flex items-center gap-3 p-2 bg-white rounded-lg border border-gray-100 cursor-pointer hover:border-brand-active transition">
+                                            <input type="checkbox" checked={selectedCourses.has(c.id)} onChange={() => toggleCourse(c.id)} className="w-4 h-4 accent-brand-accent" />
+                                            <span className="font-bold text-sm text-gray-700">{c.title}</span>
+                                        </label>
+                                    ))}
+                                </div>
+
+                                <div className="flex gap-4 border-b border-gray-200 pb-2 pt-2">
+                                    <button onClick={() => setGenMode('random')} className={`font-bold pb-2 px-2 transition-all ${genMode === 'random' ? 'text-brand-accent border-b-2 border-brand-accent' : 'text-gray-400 hover:text-gray-600'}`}>توليد عشوائي</button>
+                                    <button onClick={() => setGenMode('manual')} className={`font-bold pb-2 px-2 transition-all ${genMode === 'manual' ? 'text-brand-accent border-b-2 border-brand-accent' : 'text-gray-400 hover:text-gray-600'}`}>إدخال يدوي</button>
+                                </div>
+
+                                {genMode === 'random' ? (
+                                    <input type="number" value={codeCount} onChange={e => setCodeCount(e.target.value)} placeholder="عدد الأكواد المطلوبة" className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-brand-active font-bold text-center text-lg" />
+                                ) : (
+                                    <textarea value={manualCodes} onChange={e => setManualCodes(e.target.value)} placeholder="أدخل أكوادك هنا... (كود في كل سطر)" className="w-full p-4 h-32 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-brand-active font-mono text-left" dir="ltr"></textarea>
+                                )}
+
+                                <button onClick={handleGenerate} className="w-full bg-brand-active text-gray-900 font-black text-xl p-4 rounded-xl shadow-lg shadow-yellow-200 hover:bg-yellow-400 transition">⚡ {genMode === 'random' ? 'توليد' : 'إضافة'} الأكواد الآن</button>
+                            </div>
+                        </div>
+
+                        <div className="bg-gray-900 p-8 rounded-2xl shadow-xl flex flex-col relative overflow-hidden">
+                            <div className="absolute top-0 left-0 w-32 h-32 bg-brand-active opacity-10 rounded-full blur-3xl -ml-10 -mt-10"></div>
+                            <div className="flex justify-between items-center mb-6 relative z-10">
+                                <h4 className="font-black text-white text-xl">الأكواد الجاهزة</h4>
+                                <div className="flex gap-2">
+                                    <button onClick={handleCopyCodes} className="bg-emerald-500 text-white px-4 py-2 rounded-lg font-bold text-sm shadow hover:bg-emerald-400 transition">📋 نسخ</button>
+                                    <button onClick={() => window.print()} className="bg-white text-gray-900 px-4 py-2 rounded-lg font-bold text-sm shadow hover:bg-gray-100 transition">🖨️ طباعة</button>
+                                </div>
+                            </div>
+                            <div className="bg-gray-800/50 p-6 rounded-xl grid grid-cols-2 gap-3 border border-gray-700 flex-1 overflow-y-auto relative z-10 max-h-[400px]">
+                                {generatedCodes.length === 0 ? <p className="text-gray-500 col-span-2 text-center text-sm">لا توجد أكواد حديثة</p> : generatedCodes.map(c => (
+                                    <div key={c.code} className="bg-gray-800 border border-gray-600 p-3 rounded-lg text-brand-active font-mono font-bold text-center tracking-widest text-lg">
+                                        {c.code}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const HistoryTab = () => {
+            const [history, setHistory] = useState([]);
+            const [allCourses, setAllCourses] = useState([]);
+            const [filter, setFilter] = useState('all');
+            const [search, setSearch] = useState('');
+            const [selectedCodes, setSelectedCodes] = useState(new Set());
+            const [coursesToAdd, setCoursesToAdd] = useState(new Set());
+            const [isUpdating, setIsUpdating] = useState(false);
+
+            const fetchData = async () => {
+                const { data: hData } = await supabase.from('coupon_codes').select('code, is_used, course_ids, redeemed_courses, created_at, profiles!locked_to(full_name)').order('created_at', { ascending: false }).limit(300);
+                if (hData) setHistory(hData);
+                const { data: cData } = await supabase.from('courses').select('id, title');
+                if (cData) setAllCourses(cData);
+            };
+
+            useEffect(() => { fetchData(); }, []);
+
+            let filtered = history.filter(c => c.code.includes(search));
+            if (filter === 'used') filtered = filtered.filter(c => c.is_used || (c.redeemed_courses && c.redeemed_courses.length > 0));
+            if (filter === 'unused') filtered = filtered.filter(c => !c.is_used && (!c.redeemed_courses || c.redeemed_courses.length === 0));
+
+            const toggleCodeSelection = (codeStr) => {
+                const newSet = new Set(selectedCodes);
+                newSet.has(codeStr) ? newSet.delete(codeStr) : newSet.add(codeStr);
+                setSelectedCodes(newSet);
+            };
+
+            const toggleSelectAll = () => {
+                if (selectedCodes.size === filtered.length) {
+                    setSelectedCodes(new Set());
+                } else {
+                    setSelectedCodes(new Set(filtered.map(c => c.code)));
+                }
+            };
+
+            const applyBulkEdit = async () => {
+                if (coursesToAdd.size === 0) return Swal.fire({ icon: 'warning', text: 'يرجى اختيار كورس واحد على الأقل لإضافته للأكواد المحددة.' });
+
+                Swal.fire({
+                    title: 'تأكيد التحديث الجماعي',
+                    text: `سيتم إضافة الكورسات لـ ${selectedCodes.size} كود، هل أنت متأكد؟`,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'تأكيد وحفظ',
+                    cancelButtonText: 'إلغاء',
+                    confirmButtonColor: '#10b981'
+                }).then(async (result) => {
+                    if (result.isConfirmed) {
+                        setIsUpdating(true);
+                        Swal.fire({ title: 'جاري التحديث...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+                        const codesArr = Array.from(selectedCodes);
+                        const newCoursesArr = Array.from(coursesToAdd);
+
+                        for (let code of codesArr) {
+                            const item = history.find(h => h.code === code);
+                            const currentCourses = item.course_ids || [];
+                            const newCourseSet = new Set([...currentCourses, ...newCoursesArr]);
+                            await supabase.from('coupon_codes').update({ course_ids: Array.from(newCourseSet) }).eq('code', code);
+                        }
+
+                        Swal.fire({ icon: 'success', title: 'عملية ناجحة', text: `تم تحديث ${codesArr.length} كود بنجاح!`, confirmButtonColor: '#10b981' });
+                        setSelectedCodes(new Set());
+                        setCoursesToAdd(new Set());
+                        setIsUpdating(false);
+                        fetchData();
+                    }
+                });
+            };
+
+            return (
+                <div className="animate-fade-in mb-8">
+                    <TopBar title="سجل الأكواد الشامل" />
+                    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+
+                        <div className="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                            <h3 className="text-sm font-bold">متابعة وحالة الأكواد</h3>
+                            <div className="flex gap-4 items-center">
+                                <select value={filter} onChange={e => setFilter(e.target.value)} className="text-xs border border-gray-200 rounded-lg px-3 py-2 outline-none font-bold bg-white text-gray-700 cursor-pointer hover:border-brand-active">
+                                    <option value="all">الكل</option>
+                                    <option value="used">المستخدمة / المسحوبة</option>
+                                    <option value="unused">غير المستخدمة نهائياً</option>
+                                </select>
+                                <div className="relative">
+                                    <Icon path={paths.search} size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                                    <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="ابحث برقم الكود..." className="text-xs border border-gray-200 rounded-lg pr-8 pl-3 py-2 outline-none w-64 focus:border-brand-active font-bold" />
+                                </div>
+                            </div>
+                        </div>
+
+                        {selectedCodes.size > 0 && (
+                            <div className="p-5 bg-blue-50 border-b border-blue-100 flex flex-col gap-3">
+                                <div className="flex justify-between items-center">
+                                    <h4 className="font-bold text-blue-900 text-sm">🛠️ ترقية الأكواد المحددة ({selectedCodes.size} كود): أضف كورسات جديدة لباقتهم</h4>
+                                </div>
+                                <div className="flex flex-wrap gap-2">
+                                    {allCourses.map(c => (
+                                        <label key={c.id} className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border cursor-pointer transition-all text-xs font-bold ${coursesToAdd.has(c.id) ? 'bg-brand-active border-brand-active text-black' : 'bg-white border-blue-200 text-gray-600 hover:border-brand-active'}`}>
+                                            <input type="checkbox" className="hidden" checked={coursesToAdd.has(c.id)} onChange={() => {
+                                                const newSet = new Set(coursesToAdd);
+                                                newSet.has(c.id) ? newSet.delete(c.id) : newSet.add(c.id);
+                                                setCoursesToAdd(newSet);
+                                            }} />
+                                            {c.title}
+                                        </label>
+                                    ))}
+                                </div>
+                                <div>
+                                    <button onClick={applyBulkEdit} disabled={isUpdating} className="bg-gray-900 text-white px-5 py-2 rounded-lg font-bold text-xs hover:bg-gray-800 disabled:opacity-50 transition-all shadow-lg">
+                                        ⚡ تأكيد وحفظ التعديلات
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
+                        <div className="overflow-x-auto max-h-[500px]">
+                            <table className="w-full text-right text-[13px]">
+                                <thead className="bg-[#EAF4F6] text-gray-600 font-bold sticky top-0 z-10 shadow-sm">
+                                    <tr>
+                                        <th className="px-5 py-4">
+                                            <input type="checkbox" className="w-4 h-4 accent-brand-accent cursor-pointer"
+                                                checked={selectedCodes.size > 0 && selectedCodes.size === filtered.length}
+                                                onChange={toggleSelectAll} title="تحديد الكل" />
+                                        </th>
+                                        <th className="px-5 py-4">رقم الكود</th>
+                                        <th className="px-5 py-4">حالة الباقة (الرصيد الجزئي)</th>
+                                        <th className="px-5 py-4">الطالب المالك</th>
+                                        <th className="px-5 py-4">تاريخ التوليد</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="text-gray-700 font-semibold divide-y divide-gray-100">
+                                    {filtered.map(c => {
+                                        const total = c.course_ids ? c.course_ids.length : 0;
+                                        const used = c.redeemed_courses ? c.redeemed_courses.length : 0;
+                                        const isFull = c.is_used || used === total;
+                                        return (
+                                            <tr key={c.code} className={`transition-colors ${selectedCodes.has(c.code) ? 'bg-brand-active/10' : 'hover:bg-gray-50'}`}>
+                                                <td className="px-5 py-4">
+                                                    <input type="checkbox" className="w-4 h-4 accent-brand-accent cursor-pointer"
+                                                        checked={selectedCodes.has(c.code)}
+                                                        onChange={() => toggleCodeSelection(c.code)} />
+                                                </td>
+                                                <td className="px-5 py-4 font-mono text-lg text-brand-accent tracking-widest font-black">{c.code}</td>
+                                                <td className="px-5 py-4">
+                                                    <span className={`px-3 py-1.5 rounded-lg text-[11px] font-bold ${isFull ? 'bg-red-100 text-red-700 border border-red-200' : (used > 0 ? 'bg-yellow-100 text-yellow-700 border border-yellow-200' : 'bg-green-100 text-green-700 border border-green-200')}`}>
+                                                        {isFull ? 'مكتمل' : (used > 0 ? `ساري (${used}/${total})` : `متاح (${total})`)}
+                                                    </span>
+                                                </td>
+                                                <td className="px-5 py-4 font-bold">{c.profiles?.full_name || '-'}</td>
+                                                <td className="px-5 py-4 text-gray-500">{new Date(c.created_at).toLocaleDateString('ar-EG')}</td>
+                                            </tr>
+                                        )
+                                    })}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // --- Tab: Notifications Management ---
+        const NotificationsTab = () => {
+            const [title, setTitle] = useState('');
+            const [message, setMessage] = useState('');
+            const [type, setType] = useState('global');
+            // استخدمنا Set و Search بدل الـ ID الواحد
+            const [selectedStudents, setSelectedStudents] = useState(new Set());
+            const [searchTerm, setSearchTerm] = useState('');
+            
+            const [students, setStudents] = useState([]);
+            const [sentNotifications, setSentNotifications] = useState([]);
+            const [isSending, setIsSending] = useState(false);
+
+            const fetchData = async () => {
+                const { data: studentsData } = await supabase.from('profiles').select('id, full_name, phone').order('created_at', { ascending: false });
+                if (studentsData) setStudents(studentsData);
+
+                const { data: notifData } = await supabase.from('notifications').select('*, profiles(full_name)').order('created_at', { ascending: false }).limit(30);
+                if (notifData) setSentNotifications(notifData);
+            };
+
+            useEffect(() => { fetchData(); }, []);
+
+            const handleSendNotification = async (e) => {
+                e.preventDefault();
+                if (!title.trim() || !message.trim()) return Swal.fire({ icon: 'warning', text: 'يرجى كتابة عنوان ونص الإشعار' });
+                if (type === 'private' && selectedStudents.size === 0) return Swal.fire({ icon: 'warning', text: 'يرجى تحديد طالب واحد على الأقل' });
+
+                setIsSending(true);
+
+                // تجهيز مصفوفة الإشعارات للإرسال
+                let notificationsToInsert = [];
+                if (type === 'global') {
+                    notificationsToInsert.push({ title: title.trim(), message: message.trim(), type: 'global', target_user_id: null });
+                } else {
+                    selectedStudents.forEach(s_id => {
+                        notificationsToInsert.push({ title: title.trim(), message: message.trim(), type: 'private', target_user_id: s_id });
+                    });
+                }
+
+                const { error } = await supabase.from('notifications').insert(notificationsToInsert);
+                setIsSending(false);
+
+                if (error) {
+                    Swal.fire({ icon: 'error', title: 'خطأ', text: error.message });
+                } else {
+                    Swal.fire({ icon: 'success', title: 'تم الإرسال', text: `تم إرسال الإشعار لـ ${notificationsToInsert.length} مستلم بنجاح!`, timer: 2000, showConfirmButton: false });
+                    setTitle(''); setMessage(''); setSelectedStudents(new Set()); setSearchTerm('');
+                    fetchData();
+                }
+            };
+
+            const handleDelete = async (id) => {
+                if (confirm('هل أنت متأكد من حذف هذا الإشعار؟')) {
+                    await supabase.from('notifications').delete().eq('id', id);
+                    fetchData();
+                }
+            };
+
+            return (
+                <div className="animate-fade-in mb-8">
+                    <TopBar title="نظام الإشعارات الذكي" setIsMobileOpen={() => {}} />
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+                        <div className="col-span-1 md:col-span-5 bg-white p-6 rounded-2xl border border-gray-100 shadow-sm h-fit">
+                            <h3 className="text-lg font-black mb-4 flex items-center gap-2"><Icon path={paths.bell} /> إرسال إشعار جديد</h3>
+                            <form onSubmit={handleSendNotification} className="space-y-4">
+                                
+                                <div className="flex gap-4 p-1 bg-gray-50 rounded-xl border border-gray-200">
+                                    <button type="button" onClick={() => setType('global')} className={`flex-1 py-2 rounded-lg font-bold text-sm transition-all ${type === 'global' ? 'bg-white shadow-sm text-brand-textPrimary border border-gray-200' : 'text-gray-400'}`}>🌍 للكل (Global)</button>
+                                    <button type="button" onClick={() => setType('private')} className={`flex-1 py-2 rounded-lg font-bold text-sm transition-all ${type === 'private' ? 'bg-white shadow-sm text-brand-textPrimary border border-gray-200' : 'text-gray-400'}`}>👤 لطلاب محددين</button>
+                                </div>
+
+                                {/* نظام البحث والتحديد الذكي */}
+                                {type === 'private' && (
+                                    <div className="border border-gray-200 rounded-xl p-3 bg-gray-50 max-h-[250px] flex flex-col">
+                                        <div className="relative mb-2 shrink-0">
+                                            <Icon path={paths.search} size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                                            <input type="text" value={searchTerm} onChange={e => setSearchTerm(e.target.value.toLowerCase())} placeholder="ابحث باسم الطالب أو رقمه..." className="w-full pl-3 pr-8 py-2 bg-white border border-gray-200 rounded-lg text-xs outline-none focus:border-brand-active font-bold" />
+                                        </div>
+                                        <div className="flex justify-between items-center mb-2 px-1 shrink-0">
+                                            <span className="text-xs font-bold text-gray-500">تم تحديد: <span className="text-brand-accent">{selectedStudents.size}</span> طالب</span>
+                                            <div className="flex gap-2">
+                                                <button type="button" onClick={() => setSelectedStudents(new Set(students.map(s => s.id)))} className="text-[10px] bg-brand-active text-yellow-900 px-2 py-1 rounded shadow-sm font-bold">تحديد الكل</button>
+                                                <button type="button" onClick={() => setSelectedStudents(new Set())} className="text-[10px] bg-red-100 text-red-600 px-2 py-1 rounded shadow-sm font-bold">إلغاء</button>
+                                            </div>
+                                        </div>
+                                        <div className="overflow-y-auto flex-1 space-y-1 pr-1 custom-scrollbar">
+                                            {students.filter(s => (s.full_name || '').toLowerCase().includes(searchTerm) || (s.phone || '').includes(searchTerm)).map(s => (
+                                                <label key={s.id} className={`flex items-center gap-3 p-2 rounded-lg border cursor-pointer transition ${selectedStudents.has(s.id) ? 'bg-brand-active/20 border-brand-active shadow-sm' : 'bg-white border-gray-100 hover:border-brand-active'}`}>
+                                                    <input type="checkbox" checked={selectedStudents.has(s.id)} onChange={() => {
+                                                        const newSet = new Set(selectedStudents);
+                                                        newSet.has(s.id) ? newSet.delete(s.id) : newSet.add(s.id);
+                                                        setSelectedStudents(newSet);
+                                                    }} className="w-4 h-4 accent-brand-accent rounded cursor-pointer" />
+                                                    <div>
+                                                        <p className="text-sm font-bold text-gray-800">{s.full_name || 'بدون اسم'}</p>
+                                                        <p className="text-[10px] text-gray-500 font-mono leading-none mt-1">{s.phone || '-'}</p>
+                                                    </div>
+                                                </label>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="عنوان الإشعار (مثال: تنبيه هام، عيدية الكورس)" className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-brand-active font-bold" />
+                                
+                                <textarea value={message} onChange={(e) => setMessage(e.target.value)} placeholder="نص الإشعار التفصيلي..." className="w-full p-3 h-28 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-brand-active font-bold resize-none"></textarea>
+                                
+                                <button type="submit" disabled={isSending} className="w-full bg-brand-accent text-white py-3 rounded-xl font-black shadow-[0_4px_15px_rgba(14,165,233,0.3)] hover:bg-blue-600 hover:-translate-y-0.5 transition-all flex justify-center items-center gap-2 disabled:opacity-50">
+                                    {isSending ? 'جاري الإرسال للطلاب...' : '🚀 إرسال الإشعار الآن'}
+                                </button>
+                            </form>
+                        </div>
+
+                        <div className="col-span-1 md:col-span-7 bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex flex-col max-h-[600px]">
+                            <h3 className="text-lg font-black mb-4">📜 سجل الإشعارات السابقة</h3>
+                            <div className="overflow-y-auto pr-2 space-y-3 flex-1 custom-scrollbar">
+                                {sentNotifications.length === 0 ? <p className="text-center text-gray-400 py-4 font-bold">لم يتم إرسال إشعارات بعد.</p> : sentNotifications.map(notif => (
+                                    <div key={notif.id} className="bg-gray-50 border border-gray-200 p-4 rounded-xl flex justify-between items-start gap-4 hover:border-brand-accent transition-colors group">
+                                        <div>
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <span className={`px-2 py-0.5 rounded text-[10px] font-bold shadow-sm ${notif.type === 'global' ? 'bg-blue-100 text-blue-700 border border-blue-200' : 'bg-purple-100 text-purple-700 border border-purple-200'}`}>
+                                                    {notif.type === 'global' ? 'عام للكل' : 'مخصص'}
+                                                </span>
+                                                <h4 className="font-bold text-gray-900 text-sm">{notif.title}</h4>
+                                            </div>
+                                            <p className="text-gray-600 text-xs mt-2 line-clamp-2 leading-relaxed">{notif.message}</p>
+                                            <div className="text-[10px] text-gray-400 mt-3 font-bold flex gap-4 bg-white px-2 py-1 rounded w-fit border border-gray-100">
+                                                <span>📅 {new Date(notif.created_at).toLocaleDateString('ar-EG')}</span>
+                                                {notif.type === 'private' && <span>👤 المستلم: <span className="text-brand-accent">{notif.profiles?.full_name || 'طالب مجهول'}</span></span>}
+                                            </div>
+                                        </div>
+                                        <button onClick={() => handleDelete(notif.id)} className="text-red-400 hover:bg-red-50 hover:text-red-600 p-2 rounded-lg shrink-0 transition-colors opacity-0 group-hover:opacity-100" title="حذف الإشعار">
+                                            <Icon path={paths.trash} size={16} />
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // --- Tab: Student Messages (Secret Feedback) ---
+        const MessagesTab = () => {
+            const [messages, setMessages] = useState([]);
+            const [replyingTo, setReplyingTo] = useState(null);
+            const [replyText, setReplyText] = useState('');
+
+            const fetchMessages = async () => {
+                // بنجيب الرسائل مع بيانات الطالب (الاسم والهاتف)
+                const { data } = await supabase
+                    .from('student_messages')
+                    .select('*, profiles(full_name, phone)')
+                    .order('created_at', { ascending: false });
+                if (data) setMessages(data);
+            };
+
+            useEffect(() => { fetchMessages(); }, []);
+
+            const handleSendReply = async (msgId, studentId, videoTitle) => {
+                if (!replyText.trim()) return Swal.fire({ icon: 'warning', text: 'اكتب الرد أولاً' });
+
+                Swal.fire({ title: 'جاري إرسال الرد...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+                // 1. تحديث حالة الرسالة في جدول student_messages
+                const { error: updateError } = await supabase
+                    .from('student_messages')
+                    .update({ reply: replyText, status: 'replied' })
+                    .eq('id', msgId);
+
+                if (updateError) return Swal.fire('خطأ', updateError.message, 'error');
+
+                // 2. إرسال إشعار للطالب (عنوان ثابت وسري ومميز) 💌
+                const fixedTitle = 'رسالة من أ. محمد زايد';
+                const notifMessage = `رداً علي رسالتك الخاصه:\n${replyText}`;
+                
+                await supabase.from('notifications').insert([{
+                    title: fixedTitle,
+                    message: notifMessage,
+                    type: 'private',
+                    target_user_id: studentId
+                }]);
+
+                Swal.fire('نجاح', 'تم إرسال الرد وإشعار الطالب بنجاح!', 'success');
+                setReplyingTo(null);
+                setReplyText('');
+                fetchMessages(); // تحديث القائمة
+            };
+
+            return (
+                <div className="animate-fade-in mb-8">
+                    <TopBar title="صندوق الفضفضة والأسئلة السرية 💡" setIsMobileOpen={() => {}} />
+                    
+                    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+                        <div className="space-y-4 max-h-[70vh] overflow-y-auto custom-scrollbar pr-2">
+                            {messages.length === 0 ? <p className="text-center text-gray-400 py-8 font-bold">لا توجد رسائل سرية جديدة.</p> : messages.map(msg => (
+                                <div key={msg.id} className={`p-5 rounded-2xl border ${msg.status === 'replied' ? 'bg-gray-50 border-gray-200' : 'bg-yellow-50/50 border-yellow-200 shadow-sm'}`}>
+                                    <div className="flex justify-between items-start mb-3">
+                                        <div>
+                                            <h4 className="font-black text-gray-900">{msg.profiles?.full_name || 'طالب مجهول'} <span className="text-xs text-gray-500 font-mono font-normal">({msg.profiles?.phone || '-'})</span></h4>
+                                            <p className="text-xs font-bold text-blue-600 mt-1">🎬 {msg.video_title}</p>
+                                        </div>
+                                        <span className={`text-[10px] font-bold px-3 py-1 rounded-full ${msg.status === 'replied' ? 'bg-green-100 text-green-700' : 'bg-yellow-200 text-yellow-800'}`}>
+                                            {msg.status === 'replied' ? '✅ تم الرد' : '⏳ بانتظار ردك'}
+                                        </span>
+                                    </div>
+                                    
+                                    <p className="text-gray-700 text-sm font-bold bg-white p-4 rounded-xl border border-gray-100 mb-4 whitespace-pre-wrap leading-relaxed">{msg.message}</p>
+
+                                    {msg.status === 'pending' ? (
+                                        replyingTo === msg.id ? (
+                                            <div className="mt-4 animate-fade-in">
+                                                <textarea autoFocus value={replyText} onChange={e => setReplyText(e.target.value)} placeholder="اكتب ردك السري هنا... (سيصل للطالب كإشعار في الكورسات)..." className="w-full p-3 border border-blue-200 rounded-xl text-sm font-bold focus:outline-none focus:border-blue-500 bg-white resize-none h-28 mb-2 leading-relaxed"></textarea>
+                                                <div className="flex gap-2">
+                                                    <button onClick={() => handleSendReply(msg.id, msg.student_id, msg.video_title)} className="bg-blue-600 text-white font-bold px-6 py-2 rounded-lg hover:bg-blue-700 text-sm transition">إرسال الرد السري 🚀</button>
+                                                    <button onClick={() => { setReplyingTo(null); setReplyText(''); }} className="bg-gray-200 text-gray-700 font-bold px-6 py-2 rounded-lg hover:bg-gray-300 text-sm transition">إلغاء</button>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <button onClick={() => setReplyingTo(msg.id)} className="bg-yellow-400 text-black font-black px-6 py-2 rounded-xl text-sm shadow-md hover:bg-yellow-500 transition">💬 الرد بسرية تامة</button>
+                                        )
+                                    ) : (
+                                        <div className="mt-2 bg-green-50 p-4 rounded-xl border border-green-100">
+                                            <span className="text-xs font-black text-green-700 block mb-1">ردك السري:</span>
+                                            <p className="text-sm font-bold text-gray-800 whitespace-pre-wrap leading-relaxed">{msg.reply}</p>
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const App = () => {
+            const [activeTab, setActiveTab] = useState('dashboard');
+            const [isAuth, setIsAuth] = useState(false);
+            const [isMobileOpen, setIsMobileOpen] = useState(false); // حالة القائمة للموبايل
+
+            useEffect(() => {
+                const checkUser = async () => {
+                    const { data: { user } } = await supabase.auth.getUser();
+                    if (!user || user.email !== '01001809230m@gmail.com') {
+                        window.location.replace('index.html');
+                    } else {
+                        setIsAuth(true);
+                    }
+                };
+                checkUser();
+            }, []);
+
+            if (!isAuth) return null;
+
+            return (
+                <Fragment>
+                    <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} isMobileOpen={isMobileOpen} setIsMobileOpen={setIsMobileOpen} />
+                    <main className="flex-1 bg-brand-bg p-4 md:p-8 overflow-y-auto w-full relative flex flex-col justify-between">
+                        <div>
+                            {/* تم تمرير دالة الفتح لكل التبويبات التي تستخدم TopBar */}
+                            {activeTab === 'dashboard' && <DashboardTab />}
+                            {activeTab === 'content' && <ContentTab />}
+                            {activeTab === 'activation' && <ActivationTab />}
+                            {activeTab === 'students' && <StudentsTab />}
+                            {activeTab === 'codes' && <CodesTab />}
+                            {activeTab === 'history' && <HistoryTab />}
+                            {activeTab === 'notifications' && <NotificationsTab />}
+                            {activeTab === 'messages' && <MessagesTab />}
+                        </div>
+
+                        <div className="text-center pt-8 pb-4 mt-auto border-t border-gray-200/60">
+                            <p className="text-sm font-bold text-gray-500 mb-2 tracking-wide">
+                                صُنع بكل حب من طالب نهل من علم أستاذه فكان العلم نوراً.
+                            </p>
+                            <p className="glowing-text font-black text-emerald-400 tracking-[0.2em] text-lg uppercase">
+                                Created By Mustafa Mahmoud
+                            </p>
+                        </div>
+                    </main>
+                </Fragment>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script> 
+    <script>
+    // دالة فورية بتشتغل أول ما المتصفح يلمس الصفحة
+    (async function checkUserAndRedirect() {
+        try {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session) {
+                window.location.replace('course.html'); 
+            }
+        } catch (error) {
+            console.error('Error checking session:', error);
+        }
+    })();
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منصة الأستاذ محمد زايد | أسطورة الأحياء والجيولوجيا</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&family=Amiri:wght@700&display=swap" rel="stylesheet">
+    
+    <style>
+        html { overflow-x: hidden; max-width: 100vw; }
+        * { font-family: 'Cairo', sans-serif; scroll-behavior: smooth; box-sizing: border-box; }
+        .hero-font { font-family: 'Amiri', serif; }
+        
+        /* Glassmorphism Effect */
+        .glass-nav {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .glass-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .glass-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(16, 185, 129, 0.2);
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+
+        .whatsapp-float {
+            position: fixed; bottom: 30px; left: 30px; width: 60px; height: 60px;
+            background: #25D366; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 20px rgba(37, 211, 102, 0.4); cursor: pointer; z-index: 1000;
+            transition: transform 0.3s;
+        }
+        .whatsapp-float:hover { transform: scale(1.1); }
+
+        /* تأثير المياه */
+        @keyframes waterFlow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        .water-text {
+            background: linear-gradient(270deg, #34d399, #06b6d4, #3b82f6, #10b981);
+            background-size: 300% 300%; -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            animation: waterFlow 3s ease infinite;
+        }
+
+        /* مؤشر الكتابة */
+        .cursor::after { content: '|'; animation: blink 1s infinite; color: #10b981; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in-up { animation: fadeInUp 0.8s ease-out forwards; }
+
+        /* تنسيقات الكروت الـ 3D الدوارة مع دعم اللمس */
+        .carousel-container {
+            position: relative;
+            width: 280px; height: 350px;
+            perspective: 1200px;
+            margin: 0 auto;
+            z-index: 20;
+            touch-action: pan-y;
+        }
+        
+        /* تصغير الكاروسيل على الموبايل عشان يظهر كامل */
+        @media (max-width: 768px) {
+            .carousel-container {
+                transform: scale(0.55);
+                margin-top: -60px;
+                margin-bottom: -60px;
+                overflow: visible;
+            }
+            .carousel-section-wrapper {
+                overflow: hidden;
+                width: 100%;
+            }
+        }
+
+        .carousel-3d {
+            position: absolute; width: 100%; height: 100%;
+            transform-style: preserve-3d;
+            cursor: grab;
+            will-change: transform;
+        }
+        .carousel-3d:active { cursor: grabbing; }
+        
+        .card-3d {
+            position: absolute; width: 100%; height: 100%;
+            background-size: cover; background-position: center;
+            border-radius: 15px; border: 2px solid #10b981;
+            box-shadow: inset 0 0 0 2000px rgba(15, 23, 42, 0.88);
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            padding: 20px; text-align: center; transition: box-shadow 0.4s, border-color 0.4s;
+            user-select: none;
+        }
+        .card-3d:hover { box-shadow: inset 0 0 0 2000px rgba(15, 23, 42, 0.6); border-color: #3b82f6; }
+        .card-3d h3 { color: #34d399; font-size: 1.4rem; font-weight: bold; margin-bottom: 10px; text-shadow: 0 2px 5px rgba(0,0,0,0.8); pointer-events: none; }
+        .card-3d p { font-size: 0.95rem; line-height: 1.6; color: #cbd5e1; margin-bottom: 20px; pointer-events: none; }
+        .card-3d button {
+            padding: 8px 20px; background: linear-gradient(90deg, #10b981, #3b82f6);
+            border: none; border-radius: 8px; color: #fff; font-weight: bold; transition: 0.3s;
+            cursor: pointer;
+        }
+        .card-3d button:hover { box-shadow: 0 0 15px rgba(59, 130, 246, 0.6); transform: translateY(-2px); }
+
+        .c1 { transform: rotateY(0deg) translateZ(320px); background-image: url('https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=400'); }
+        .c2 { transform: rotateY(40deg) translateZ(320px); background-image: url('https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?w=400'); }
+        .c3 { transform: rotateY(80deg) translateZ(320px); background-image: url('https://images.unsplash.com/photo-1530026405186-ed1f139313f8?w=400'); }
+        .c4 { transform: rotateY(120deg) translateZ(320px); background-image: url('https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?w=400'); }
+        .c5 { transform: rotateY(160deg) translateZ(320px); background-image: url('https://images.unsplash.com/photo-1576086213369-97a306d36557?w=400'); }
+        .c6 { transform: rotateY(200deg) translateZ(320px); background-image: url('https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=400'); }
+        .c7 { transform: rotateY(240deg) translateZ(320px); background-image: url('https://images.unsplash.com/photo-1507413245164-6160d8298b31?w=400'); }
+        .c8 { transform: rotateY(280deg) translateZ(320px); background-image: url('https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400'); }
+        .c9 { transform: rotateY(320deg) translateZ(320px); background-image: url('https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400'); }
+    </style>
+</head>
+<body class="bg-gray-900 text-white" style="overflow-x:hidden; max-width:100vw; position:relative;">
+
+    <div class="fixed inset-0 z-0 pointer-events-none">
+        <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-emerald-600/20 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2"></div>
+        <div class="absolute bottom-0 left-0 w-[500px] h-[500px] bg-blue-600/20 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/2"></div>
+        <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5"></div>
+    </div>
+
+    <nav class="glass-nav fixed w-full z-50 top-0">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <div class="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg flex items-center justify-center font-bold text-xl shadow-lg">م</div>
+                <div class="text-2xl font-bold text-white hero-font tracking-wide">أ. محمد زايد</div>
+            </div>
+            <a href="login.html" class="bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-2.5 rounded-full transition-all font-bold shadow-lg shadow-emerald-900/50 flex items-center gap-2 group">
+                <span>تسجيل الدخول</span>
+                <svg class="w-4 h-4 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path></svg>
+            </a>
+        </div>
+    </nav>
+
+    <section class="relative z-10 min-h-screen flex items-center justify-center pt-24 pb-10 px-4" style="overflow:hidden; width:100%; max-width:100vw;">
+        <div class="container mx-auto grid lg:grid-cols-2 gap-12 items-center" style="max-width:100%; width:100%;">
+            
+            <div class="text-center lg:text-right space-y-6 w-full" style="overflow:hidden; max-width:100%; min-width:0;">
+                <div class="inline-block px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 font-bold text-sm mb-2 animate-pulse shadow-[0_0_15px_rgba(16,185,129,0.2)]">
+                    🚀 #من_أراد_استطاع | أسطورة الأحياء والجيولوجيا
+                </div>
+                
+                <h1 class="text-4xl md:text-7xl font-bold leading-tight hero-font min-h-[160px] md:min-h-[140px]" style="word-break:break-word; overflow-wrap:break-word; width:100%; max-width:100%; overflow:hidden;">
+                    <span id="type-title" class="water-text cursor" style="display:inline; word-break:break-word;"></span>
+                </h1>
+                
+                <p id="type-desc" class="text-gray-300 text-base md:text-lg leading-relaxed max-w-2xl min-h-[120px] md:min-h-[80px] font-semibold mx-auto lg:mx-0" style="word-break:break-word; overflow-wrap:break-word; width:100%; max-width:100%; overflow:hidden; text-align:inherit;">
+                </p>
+
+                <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-4 opacity-0 animate-fade-in-up" style="animation-delay: 5s; animation-fill-mode: forwards;">
+                    <a href="login.html" class="bg-white text-emerald-800 px-8 py-4 rounded-xl text-lg font-bold hover:scale-105 transition-transform shadow-xl hover:shadow-white/10 flex items-center justify-center gap-2">
+                        <span>ابدأ المذاكرة الآن</span>
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    </a>
+                    <a href="#features" class="px-8 py-4 rounded-xl text-lg font-bold border border-gray-600 hover:bg-gray-800 transition-colors text-gray-300 flex items-center justify-center">
+                        استكشف المميزات
+                    </a>
+                </div>
+            </div>
+
+            <div class="carousel-section-wrapper relative w-full flex justify-center items-center mt-12 lg:mt-0">
+                <div class="carousel-container">
+                    <div class="carousel-3d" id="carousel-3d">
+                        <div class="card-3d c1"><h3>أ. محمد زايد</h3><p>خبير مادتي الأحياء والجيولوجيا للثانوية العامة.</p><button onclick="window.location.href='#features'">اعرف أكثر</button></div>
+                        <div class="card-3d c2"><h3>#من_أراد_استطاع</h3><p>شعارنا الدائم.. نصنع التفوق ولا ننتظره أبداً.</p><button onclick="window.location.href='login.html'">انضم لكتيبتنا</button></div>
+                        <div class="card-3d c3"><h3>شرح تفصيلي</h3><p>أحدث طرق الشرح التفاعلية لضمان الفهم العميق.</p><button onclick="window.location.href='login.html'">شاهد عينة</button></div>
+                        <div class="card-3d c4"><h3>مذكرات شاملة</h3><p>المصدر الوحيد الذي ستحتاجه للوصول للدرجة النهائية.</p><button onclick="window.location.href='login.html'">تصفح المذكرات</button></div>
+                        <div class="card-3d c5"><h3>امتحانات دورية</h3><p>تدريب مستمر على أسئلة النظام الجديد المعقدة.</p><button onclick="window.location.href='login.html'">اختبر نفسك</button></div>
+                        <div class="card-3d c6"><h3>متابعة مستمرة</h3><p>فريق كامل لمتابعة مستواك خطوة بخطوة.</p><button onclick="window.location.href='login.html'">تقييم مستواك</button></div>
+                        <div class="card-3d c7"><h3>بنك أسئلة</h3><p>آلاف الأسئلة المتوقعة في امتحانات آخر العام.</p><button onclick="window.location.href='login.html'">ابدأ الحل</button></div>
+                        <div class="card-3d c8"><h3>جودة عالية</h3><p>فيديوهات مصورة بأعلى جودة لراحة عينيك.</p><button onclick="window.location.href='login.html'">اشترك الآن</button></div>
+                        <div class="card-3d c9"><h3>دعم فني وتواصل</h3><p>نحن معك في أي وقت للرد على كل أسئلتك.</p><button onclick="window.location.href='https://wa.me/201001809230'">تحدث معنا</button></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="features" class="relative z-10 py-20 bg-gray-900/50">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4 text-emerald-400">لماذا تختار منصتنا؟</h2>
+                <div class="h-1 w-24 bg-gradient-to-r from-emerald-500 to-blue-500 mx-auto rounded-full"></div>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="glass-card p-8 rounded-2xl text-center">
+                    <div class="w-16 h-16 bg-emerald-500/20 text-emerald-400 rounded-2xl flex items-center justify-center text-3xl mb-6 mx-auto">📺</div>
+                    <h3 class="text-xl font-bold mb-3">شرح بجودة عالية</h3>
+                    <p class="text-gray-400">فيديوهات مصورة بأحدث التقنيات مع دعم المشاهدة المتعددة.</p>
+                </div>
+                <div class="glass-card p-8 rounded-2xl text-center">
+                    <div class="w-16 h-16 bg-blue-500/20 text-blue-400 rounded-2xl flex items-center justify-center text-3xl mb-6 mx-auto">📝</div>
+                    <h3 class="text-xl font-bold mb-3">متابعة مستمرة</h3>
+                    <p class="text-gray-400">نظام ذكي يضمن لك متابعة تقدمك أولاً بأول مع الأستاذ.</p>
+                </div>
+                <div class="glass-card p-8 rounded-2xl text-center">
+                    <div class="w-16 h-16 bg-purple-500/20 text-purple-400 rounded-2xl flex items-center justify-center text-3xl mb-6 mx-auto">💎</div>
+                    <h3 class="text-xl font-bold mb-3">مادة علمية قوية</h3>
+                    <p class="text-gray-400">مذكرات شاملة معدة بعناية أسطورة المادة تغنيك عن أي مصدر.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="relative z-10 bg-gray-950 border-t border-gray-800 pt-12 pb-6">
+        <div class="container mx-auto px-4 text-center">
+            <h2 class="text-2xl font-bold text-emerald-500 hero-font mb-2">الأستاذ محمد زايد</h2>
+            <p class="text-gray-400 mb-8 font-semibold">#من_أراد_استطاع .. نصنع التفوق ولا ننتظره.</p>
+            <div class="border-t border-gray-800 pt-6 flex flex-col md:flex-row justify-between items-center gap-4 text-sm">
+                <p class="text-gray-500">© 2026 جميع الحقوق محفوظة.</p>
+                <p class="text-gray-500">Created by <a href="https://wa.me/201001809230" target="_blank" class="text-emerald-400 hover:text-emerald-300 font-bold transition-colors">Mustafa Mahmoud</a></p>
+            </div>
+        </div>
+    </footer>
+
+    <a href="https://wa.me/201000623768" target="_blank" class="whatsapp-float group">
+        <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+    </a>
+
+    <script>
+        // سكريبت الكتابة
+        const textToType1 = "مع الأستاذ محمد زايد.. افهم، استوعب، وقفل المادة";
+        const textToType2 = "منصة تعليمية متكاملة مع أسطورة مادتي الأحياء والجيولوجيا. شرح تفصيلي، مراجعات نهائية، وامتحانات دورية تضمن لك التفوق والدرجة النهائية بإذن الله. #من_أراد_استطاع";
+        const keySound = new Audio('https://image2url.com/r2/default/audio/1771167698267-d9f6492c-19c9-41f2-99e3-43c8292737af.wav');
+        keySound.volume = 0.75; 
+
+        async function typeWriter(elementId, text, speed) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = "";
+            for (let i = 0; i < text.length; i++) {
+                element.innerHTML += text.charAt(i);
+                try {
+                    if (text.charAt(i) !== ' ') { 
+                        keySound.currentTime = 0; 
+                        await keySound.play();
+                    }
+                } catch(e) {}
+                await new Promise(r => setTimeout(r, speed));
+            }
+            keySound.pause();
+            keySound.currentTime = 0;
+            element.classList.remove('cursor');
+        }
+
+        // سكريبت الكاروسيل والدوران بالسحب
+        window.addEventListener('load', async () => {
+            await typeWriter('type-title', textToType1, 90);
+            await typeWriter('type-desc', textToType2, 30);
+            document.querySelector('.animate-fade-in-up').style.opacity = '1';
+
+            const carousel = document.getElementById('carousel-3d');
+            let currAngle = 0;
+            let isDragging = false;
+            let startX, currentX;
+            let autoRotateReq;
+
+            function autoRotate() {
+                if (!isDragging) {
+                    currAngle -= 0.15; 
+                    carousel.style.transform = `rotateY(${currAngle}deg)`;
+                }
+                autoRotateReq = requestAnimationFrame(autoRotate);
+            }
+            autoRotate(); 
+
+            carousel.addEventListener('touchstart', (e) => {
+                isDragging = true;
+                startX = e.touches[0].clientX;
+            }, {passive: true});
+
+            carousel.addEventListener('touchmove', (e) => {
+                if (!isDragging) return;
+                currentX = e.touches[0].clientX;
+                let deltaX = currentX - startX;
+                currAngle += deltaX * 0.3; 
+                carousel.style.transform = `rotateY(${currAngle}deg)`;
+                startX = currentX;
+            }, {passive: true});
+
+            carousel.addEventListener('touchend', () => {
+                isDragging = false;
+            });
+
+            carousel.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                startX = e.clientX;
+            });
+
+            window.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                currentX = e.clientX;
+                let deltaX = currentX - startX;
+                currAngle += deltaX * 0.3;
+                carousel.style.transform = `rotateY(${currAngle}deg)`;
+                startX = currentX;
+            });
+
+            window.addEventListener('mouseup', () => {
+                isDragging = false;
+            });
+        });
+    </script>
+</body>
+</html>

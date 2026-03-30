@@ -1,0 +1,1410 @@
+<!DOCTYPE html>
+<html class="dark" dir="rtl" lang="ar">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <meta name="referrer" content="no-referrer" />
+    <title>منصه أ. محمد زايد الكورسات</title>
+
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800;900&family=Cairo:wght@400;600;700;800;900&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#20d3ee",
+                        "emerald-glow": "#10b981",
+                        "background-light": "#f6f8f8",
+                        "background-dark": "#101f22",
+                        "accent": "#00e5ff",
+                        "accent2": "#0066ff",
+                        "gold": "#ffd700",
+                        "green": "#10b981"
+                    },
+                    fontFamily: {
+                        "display": ["Tajawal", "sans-serif"],
+                        "body": ["Cairo", "sans-serif"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+
+    <script>
+        document.addEventListener('contextmenu', function (e) { e.preventDefault(); });
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'F12') e.preventDefault();
+            if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) e.preventDefault();
+            if (e.ctrlKey && e.key === 'u') e.preventDefault();
+            if (e.ctrlKey && e.shiftKey && e.key === 'K') e.preventDefault();
+        });
+    </script>
+
+    <style>
+        .scanline {
+            background: linear-gradient(to bottom, transparent 0%, rgba(32, 211, 238, 0.1) 50%, transparent 100%);
+            background-size: 100% 4px;
+            pointer-events: none;
+        }
+
+        .glass-panel {
+            background: rgba(16, 31, 34, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(32, 211, 238, 0.2);
+        }
+
+        .holographic-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            perspective: 1000px;
+        }
+
+        .holographic-card:hover {
+            border-color: #20d3ee;
+            box-shadow: 0 0 20px rgba(32, 211, 238, 0.4);
+            transform: translateY(-5px) rotateX(2deg) rotateY(-2deg);
+        }
+
+        .letter-spacing-wide {
+            letter-spacing: 2px;
+        }
+
+        body {
+            min-height: max(884px, 100dvh);
+        }
+
+        /* Profile Modal CSS & Animations */
+        .profile-modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(2, 4, 8, 0.88);
+            z-index: 10000;
+            display: none;
+            backdrop-filter: blur(10px);
+            touch-action: auto;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior: contain;
+        }
+
+        .profile-modal-overlay.active {
+            display: block;
+            animation: nd-fadeIn 0.25s ease;
+        }
+
+        .profile-modal-box {
+            position: relative;
+            max-width: 1200px;
+            margin: 80px auto 40px;
+            padding: 0 24px 40px;
+            z-index: 10001;
+        }
+
+        ._sd_closeBtn-fixed {
+            position: fixed;
+            top: 16px;
+            left: 16px;
+            background: rgba(220, 38, 38, 0.85);
+            color: #fff;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            font-size: 1.1rem;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10002;
+            transition: all 0.3s;
+        }
+
+        ._sd_closeBtn-fixed:hover {
+            background: rgba(220, 38, 38, 1);
+            transform: scale(1.1);
+        }
+
+        ._sd_profile-hero-card {
+            position: relative;
+            background: rgba(16, 31, 34, 0.7);
+            backdrop-filter: blur(22px);
+            border: 1px solid rgba(32, 211, 238, 0.2);
+            border-radius: 26px;
+            padding: 0;
+            overflow: hidden;
+            margin-bottom: 28px;
+            animation: nd-fadeUp 0.6s ease both;
+        }
+
+        ._sd_profile-cover {
+            height: 150px;
+            background: linear-gradient(135deg, #020a18 0%, #0d1f38 40%, #001a33 70%, #030810 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        ._sd_profile-info-row {
+            padding: 0 32px 28px;
+            display: flex;
+            align-items: flex-end;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+
+        ._sd_avatar-wrap {
+            position: relative;
+            margin-top: -50px;
+            flex-shrink: 0;
+            cursor: pointer;
+        }
+
+        ._sd_avatar-large {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 3px solid #101f22;
+            background: linear-gradient(135deg, #0d1f38, #0a1628);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Tajawal', sans-serif;
+            font-size: 2.2rem;
+            font-weight: 900;
+            color: #20d3ee;
+            box-shadow: 0 0 0 2px rgba(32, 211, 238, 0.28), 0 0 30px rgba(0, 229, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        ._sd_avatar-large img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+            position: absolute;
+            inset: 0;
+        }
+
+        ._sd_profile-names {
+            flex: 1;
+            padding-top: 16px;
+        }
+
+        ._sd_profile-name {
+            font-family: 'Tajawal', sans-serif;
+            font-weight: 900;
+            font-size: 1.6rem;
+            line-height: 1.2;
+            margin-bottom: 6px;
+            color: #fff;
+        }
+
+        ._sd_quick-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+
+        ._sd_qs-card {
+            background: rgba(16, 31, 34, 0.7);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(32, 211, 238, 0.2);
+            border-radius: 18px;
+            padding: 22px 18px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        ._sd_main-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 24px;
+        }
+
+        @media (min-width: 768px) {
+            ._sd_quick-stats {
+                grid-template-columns: repeat(4, 1fr);
+            }
+
+            ._sd_main-grid {
+                grid-template-columns: 1fr 360px;
+            }
+        }
+
+        ._sd_col-main {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        ._sd_col-side {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        ._sd_card {
+            background: rgba(16, 31, 34, 0.7);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(32, 211, 238, 0.2);
+            border-radius: 22px;
+            padding: 28px;
+        }
+
+        ._sd_course-row {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            padding: 16px 0;
+            border-bottom: 1px solid rgba(32, 211, 238, 0.2);
+        }
+
+        ._sd_course-thumb {
+            width: 64px;
+            height: 64px;
+            border-radius: 12px;
+            overflow: hidden;
+            flex-shrink: 0;
+            background: #0d1f38;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+        }
+
+        ._sd_course-row-info {
+            flex: 1;
+        }
+
+        ._sd_prog-bar {
+            height: 5px;
+            background: #0d1f38;
+            border-radius: 100px;
+            overflow: hidden;
+        }
+
+        ._sd_prog-fill {
+            height: 100%;
+            border-radius: 100px;
+            background: linear-gradient(90deg, #20d3ee, #0066ff);
+        }
+
+        ._sd_activity-chart {
+            display: flex;
+            align-items: flex-end;
+            gap: 6px;
+            height: 80px;
+            margin-bottom: 10px;
+        }
+
+        ._sd_act-col {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        ._sd_act-bar {
+            width: 100%;
+            border-radius: 4px 4px 0 0;
+            background: linear-gradient(180deg, #20d3ee, #0066ff);
+            opacity: 0.7;
+            min-height: 4px;
+        }
+
+        @keyframes nd-fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(22px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes nd-fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes shakeLock {
+
+            0%,
+            100% {
+                transform: rotate(0deg);
+            }
+
+            25% {
+                transform: rotate(-8deg);
+            }
+
+            75% {
+                transform: rotate(8deg);
+            }
+        }
+
+        .shaking-lock {
+            animation: shakeLock 2s ease-in-out infinite;
+        }
+
+        .lock-3d-glow {
+            color: #ff3b3b;
+        }
+
+        @keyframes vibrateBtn {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            20%,
+            60% {
+                transform: translateX(-2px) rotate(-1deg);
+            }
+
+            40%,
+            80% {
+                transform: translateX(2px) rotate(1deg);
+            }
+        }
+
+        .btn-vibrate {
+            animation: vibrateBtn 1s ease-in-out infinite;
+        }
+
+        @keyframes vibrateBtnLite {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-3px);
+            }
+        }
+
+        .btn-vibrate-lite {
+            animation: vibrateBtnLite 2s ease-in-out infinite;
+        }
+
+        @property --angle {
+            syntax: '<angle>';
+            initial-value: 0deg;
+            inherits: false;
+        }
+
+        @keyframes autoRotate {
+            0% {
+                --angle: 0deg;
+            }
+
+            100% {
+                --angle: 360deg;
+            }
+        }
+
+        /* تأثير اهتزاز الجرس للإشعارات الجديدة */
+        @keyframes shake-and-color {
+            0%, 100% { transform: rotate(0); color: #ffd700; text-shadow: 0 0 10px rgba(255,215,0,0.5); }
+            15% { transform: rotate(15deg); color: #20d3ee; text-shadow: 0 0 15px rgba(32,211,238,0.7); }
+            30% { transform: rotate(-15deg); color: #10b981; text-shadow: 0 0 15px rgba(16,185,129,0.7); }
+            45% { transform: rotate(10deg); color: #ef4444; text-shadow: 0 0 15px rgba(239,68,68,0.7); }
+            60% { transform: rotate(-10deg); color: #ffd700; text-shadow: 0 0 10px rgba(255,215,0,0.5); }
+            75% { transform: rotate(5deg); color: #20d3ee; text-shadow: 0 0 15px rgba(32,211,238,0.7); }
+        }
+
+        .bell-ringing {
+            animation: shake-and-color 1.5s ease-in-out infinite !important;
+        }
+
+        /* حركة الرسالة المنبثقة */
+        .notif-tooltip-show {
+            opacity: 1 !important;
+            transform: translateX(-50%) translateY(0) scale(1) !important;
+            pointer-events: auto !important;
+        }
+
+        /* Modal الإشعارات */
+        #notificationsModal {
+            display: none;
+        }
+        #notificationsModal.active {
+            display: flex;
+            animation: nd-fadeIn 0.25s ease;
+        }
+        .notification-card {
+            background: rgba(16, 31, 34, 0.5);
+            border: 1px solid rgba(32, 211, 238, 0.1);
+            transition: all 0.3s ease;
+        }
+        .notification-card.unread {
+            border-right: 4px solid #20d3ee;
+            background: rgba(32, 211, 238, 0.05);
+        }
+    </style>
+</head>
+
+<body
+    class="bg-background-light dark:bg-background-dark font-body text-slate-900 dark:text-slate-100 min-h-screen selection:bg-primary/30">
+
+    <aside
+        class="fixed bottom-0 left-0 right-0 w-full h-16 md:top-0 md:right-0 md:h-full md:w-64 glass-panel border-t md:border-t-0 md:border-l border-primary/20 z-50 flex flex-row md:flex-col items-center justify-around md:justify-start md:py-8 px-4 md:px-0">
+        <nav
+            class="flex flex-row md:flex-col gap-2 md:gap-8 w-full md:px-4 justify-center md:justify-start items-center">
+            <a class="flex flex-1 md:flex-none items-center justify-center md:justify-start gap-2 md:gap-4 p-2 md:p-3 rounded-xl bg-primary/10 text-primary border border-primary/30 group h-12 md:h-auto"
+                href="#">
+                <span class="material-symbols-outlined">grid_view</span>
+                <span class="hidden md:block font-display font-bold">الكورسات</span>
+                <div class="hidden md:block size-2 bg-primary rounded-full shadow-[0_0_8px_#20d3ee] md:mr-auto"></div>
+            </a>
+            <a class="flex flex-1 md:flex-none items-center justify-center md:justify-start gap-2 md:gap-4 p-2 md:p-3 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition-all group h-12 md:h-auto"
+                href="javascript:void(0)" onclick="_sd_openProfile()">
+                <span class="material-symbols-outlined">analytics</span>
+                <span class="hidden md:block font-display">الإحصائيات</span>
+            </a>
+            <a class="flex flex-1 md:flex-none items-center justify-center md:justify-start gap-2 md:gap-4 p-2 md:p-3 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition-all group h-12 md:h-auto cursor-pointer"
+                onclick="toggleTheme()">
+                <span class="material-symbols-outlined" id="themeIcon">light_mode</span>
+                <span class="hidden md:block font-display font-bold" id="themeText">الوضع النهاري</span>
+            </a>
+            <a class="flex flex-1 md:flex-none items-center justify-center md:justify-start gap-2 md:gap-4 p-2 md:p-3 rounded-xl hover:bg-red-500/10 text-red-500 hover:text-red-400 transition-all group h-12 md:h-auto"
+                href="javascript:void(0)" onclick="logoutUser()">
+                <span class="material-symbols-outlined">logout</span>
+                <span class="hidden md:block font-display font-bold">تسجيل خروج</span>
+            </a>
+        </nav>
+        <div class="md:mt-auto cursor-pointer flex-shrink-0 ml-2 md:ml-0" onclick="_sd_openProfile()">
+            <div class="size-10 rounded-full bg-slate-800 border border-slate-700 overflow-hidden">
+                <img id="_sd_headerAvatar" alt="Avatar" class="w-full h-full object-cover"
+                    src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2300e5ff'%3E%3Cpath d='M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z'/%3E%3C/svg%3E" />
+            </div>
+        </div>
+    </aside>
+
+    <main class="pb-24 md:pb-8 md:mr-64 p-4 md:p-8">
+
+        <header class="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+            <div>
+                <h1 class="font-display text-3xl md:text-4xl font-bold text-white letter-spacing-wide mb-2">أ. محمد زايد
+                </h1>
+                <p class="text-slate-400 max-w-xl">المنصة التعليمية المتكاملة لطلاب الأستاذ محمد زايد في مادتي الأحياء
+                    والجيولوجيا.</p>
+                <p class="text-xs text-primary mt-2" id="userName"></p>
+            </div>
+            
+            <div class="flex items-center gap-4">
+                <div class="relative group mr-4">
+                    <button onclick="openNotifications()" class="relative p-2 rounded-full bg-background-dark/50 border border-primary/20 backdrop-blur-md hover:bg-white/5 transition-all">
+                        <span id="bellIcon" class="material-symbols-outlined text-slate-300 text-3xl">notifications</span>
+                        <span id="notifBadge" class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full border-2 border-background-dark hidden">0</span>
+                    </button>
+                    
+                    <div id="bellTooltip" class="absolute top-full left-1/2 -translate-x-1/2 mt-3 w-max max-w-[220px] bg-background-dark/95 border border-primary text-white text-xs p-3 rounded-xl shadow-[0_0_20px_rgba(32,211,238,0.3)] backdrop-blur-xl opacity-0 pointer-events-none transition-all duration-500 -translate-y-2 scale-90 z-50">
+                        <div class="font-black text-primary mb-1 flex items-center gap-1">
+                            <span class="material-symbols-outlined text-sm">campaign</span> إشعار جديد!
+                        </div>
+                        <div id="tooltipText" class="truncate text-slate-300 font-bold">...</div>
+                        <div class="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-background-dark border-t border-l border-primary rotate-45"></div>
+                    </div>
+                </div>
+
+                <div class="flex items-center bg-background-dark/50 border border-primary/20 p-1 rounded-full backdrop-blur-md"
+                    id="_sd2_mainTabsWrap">
+                <button
+                    class="px-6 py-2 rounded-full bg-primary text-background-dark font-bold text-sm flex items-center gap-2 transition-all _sd2_tab-btn _sd2_active"
+                    onclick="_sd2_filterMain('all', this)">الكل</button>
+                <button
+                    class="px-6 py-2 rounded-full text-slate-400 hover:text-primary text-sm font-bold transition-all _sd2_tab-btn"
+                    onclick="_sd2_filterMain('free', this)">مجاني</button>
+                <button
+                    class="px-6 py-2 rounded-full text-slate-400 hover:text-primary text-sm font-bold transition-all _sd2_tab-btn"
+                    onclick="_sd2_filterMain('enrolled', this)">مشترك فيه</button>
+            </div>
+        </header>
+
+        <div class="w-full max-w-[1200px] mx-auto mb-12 relative">
+
+            <div id="dashboardSection"
+                class="w-full bg-[#E8F1F2] rounded-[24px] border-[6px] border-[#0F172A] p-4 md:p-6 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)] relative flex flex-col gap-6 text-[#1E293B] overflow-hidden transition-all duration-700 max-h-[250px]"
+                style="font-family: 'Cairo', sans-serif;">
+
+                <div id="dashFade"
+                    class="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#E8F1F2] to-transparent z-10 pointer-events-none transition-opacity duration-500">
+                </div>
+
+                <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-2">
+                    <div>
+                        <h2 class="text-3xl font-black text-[#1E293B]" id="dash_userName">مرحباً يا بطل!</h2>
+                    </div>
+                    <div
+                        class="bg-white/60 px-4 py-2.5 rounded-full border border-slate-200 flex items-center gap-3 w-full md:w-auto min-w-[300px]">
+                        <span class="material-symbols-outlined text-[#64748B]">search</span>
+                        <input type="text" placeholder="ابحث في الكورسات والمحاضرات..."
+                            class="bg-transparent border-none outline-none w-full text-sm text-[#1E293B] placeholder-slate-400 font-bold">
+                    </div>
+                </header>
+
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div
+                        class="bg-[#D1E8E9] p-4 md:p-5 rounded-xl border border-[#BCE1E2] shadow-sm hover:-translate-y-1 transition-transform">
+                        <div class="text-[#64748B] text-sm font-bold mb-1">كورسات مسجلة</div>
+                        <div class="text-4xl font-black text-[#1E293B]" id="dash_enrolled">0</div>
+                        <div class="text-xs text-teal-700 mt-2 font-bold flex items-center gap-1">المسار الدراسي الأساسي
+                        </div>
+                    </div>
+                    <div
+                        class="bg-[#FDF2C8] p-4 md:p-5 rounded-xl border border-[#FDE047] shadow-sm hover:-translate-y-1 transition-transform">
+                        <div class="text-[#64748B] text-sm font-bold mb-1">فيديوهات شاهدتها</div>
+                        <div class="text-4xl font-black text-[#1E293B]" id="dash_watched">0</div>
+                        <div class="text-xs text-yellow-700 mt-2 font-bold flex items-center gap-1">مجهود ممتاز 🔥</div>
+                    </div>
+                    <div
+                        class="bg-white/80 p-4 md:p-5 rounded-xl border border-slate-200 shadow-sm hover:-translate-y-1 transition-transform">
+                        <div class="text-[#64748B] text-sm font-bold mb-1">دورات مكتملة</div>
+                        <div class="text-4xl font-black text-[#1E293B]" id="dash_completed">0</div>
+                        <div class="text-xs text-blue-600 mt-2 font-bold flex items-center gap-1">استمر في التقفيل 🏆
+                        </div>
+                    </div>
+
+                    <div
+                        class="col-span-2 md:col-span-1 bg-white/80 p-4 md:p-5 rounded-xl border border-slate-200 shadow-sm relative overflow-hidden flex flex-col justify-center hover:-translate-y-1 transition-transform">
+                        <div class="flex justify-between items-start mb-1">
+                            <div class="text-[#64748B] text-sm font-bold">التقدم الكلي</div>
+                            <div class="text-3xl font-black text-[#1E293B]" id="dash_percent">0%</div>
+                        </div>
+                        <div id="dash_motivation"
+                            class="text-lg md:text-xl font-black text-[#20d3ee] drop-shadow-[0_0_12px_rgba(32,211,238,0.9)] mb-3 leading-tight">
+                            جاري سحب إحصائياتك...</div>
+
+                        <div class="w-full h-2.5 bg-slate-200 rounded-full overflow-hidden border border-slate-300">
+                            <div class="h-full bg-gradient-to-l from-[#10B981] to-[#20D3EE] w-0 transition-all duration-1000 shadow-[0_0_10px_#10B981]"
+                                id="dash_progressBar"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+
+                    <div class="md:col-span-4 bg-white/60 rounded-xl p-5 border border-slate-200 flex flex-col">
+                        <h3 class="font-black text-[#1E293B] mb-4 text-lg">تحليل المواد</h3>
+                        <div class="flex justify-around items-end flex-1 border-b border-slate-300 pb-2 min-h-[120px]">
+                            <div class="w-12 bg-[#D1E8E9] h-[85%] rounded-t-lg relative group border border-[#BCE1E2]">
+                                <span
+                                    class="absolute -top-7 left-1/2 -translate-x-1/2 text-xs font-black text-[#1E293B] opacity-0 group-hover:opacity-100 transition-opacity">85%</span>
+                            </div>
+                            <div class="w-12 bg-[#FDF2C8] h-[55%] rounded-t-lg relative group border border-[#FDE047]">
+                                <span
+                                    class="absolute -top-7 left-1/2 -translate-x-1/2 text-xs font-black text-[#1E293B] opacity-0 group-hover:opacity-100 transition-opacity">55%</span>
+                            </div>
+                            <div class="w-12 bg-slate-300 h-[30%] rounded-t-lg relative group border border-slate-400">
+                                <span
+                                    class="absolute -top-7 left-1/2 -translate-x-1/2 text-xs font-black text-[#1E293B] opacity-0 group-hover:opacity-100 transition-opacity">30%</span>
+                            </div>
+                        </div>
+                        <div class="flex justify-between mt-3 text-sm font-bold text-[#64748B]">
+                            <div class="text-center flex-1"><span class="text-teal-700 font-black">الأحياء</span></div>
+                            <div class="text-center flex-1"><span class="text-yellow-700 font-black">جيولوجيا</span>
+                            </div>
+                            <div class="text-center flex-1"><span class="text-slate-600 font-black">مراجعات</span></div>
+                        </div>
+                    </div>
+
+                    <div
+                        class="md:col-span-5 bg-[#D1E8E9] rounded-xl p-5 relative overflow-hidden border border-[#BCE1E2] shadow-inner">
+                        <div class="flex justify-between items-center mb-2">
+                            <h3 class="font-black text-[#1E293B] text-lg">معدل الأداء الأسبوعي</h3>
+                            <span
+                                class="bg-[#FDF2C8] text-[#1E293B] text-xs font-black px-3 py-1 rounded-lg border border-[#FDE047] shadow-sm">آخر
+                                7 أيام 📉</span>
+                        </div>
+                        <svg class="w-full h-32 mt-4 drop-shadow-xl" viewBox="0 0 400 100" preserveAspectRatio="none">
+                            <path d="M0,80 L50,60 L100,70 L150,40 L200,90 L250,20 L300,50 L350,10 L400,30" fill="none"
+                                stroke="#1E293B" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+                            <circle cx="50" cy="60" r="5" fill="#FDF2C8" stroke="#1E293B" stroke-width="2" />
+                            <circle cx="150" cy="40" r="5" fill="#FDF2C8" stroke="#1E293B" stroke-width="2" />
+                            <circle cx="250" cy="20" r="5" fill="#FDF2C8" stroke="#1E293B" stroke-width="2" />
+                            <circle cx="350" cy="10" r="6" fill="#10B981" stroke="#1E293B" stroke-width="3" />
+                        </svg>
+                    </div>
+
+                    <div class="md:col-span-3 bg-white/60 rounded-xl p-5 border border-slate-200 flex flex-col gap-3">
+                        <div class="flex justify-between items-center mb-1">
+                            <h3 class="font-black text-[#1E293B] text-lg">المهام 📌</h3>
+                            <button
+                                class="bg-[#D1E8E9] w-8 h-8 rounded-lg flex items-center justify-center font-black text-[#1E293B] hover:bg-teal-300 transition shadow-sm">+</button>
+                        </div>
+                        <div class="bg-[#FDF2C8] rounded-xl p-3 border border-[#FDE047] shadow-sm">
+                            <p class="text-[10px] text-[#64748B] font-bold mb-1">عاجل اليوم</p>
+                            <p class="text-xs font-black text-[#1E293B] leading-tight">استكمال مشاهدة الفيديوهات
+                                المتبقية</p>
+                        </div>
+                        <div class="bg-[#D1E8E9] rounded-xl p-3 border border-[#BCE1E2] shadow-sm">
+                            <p class="text-[10px] text-[#64748B] font-bold mb-1">الأسبوع القادم</p>
+                            <p class="text-xs font-black text-[#1E293B] leading-tight">الاستعداد للاختبار الشامل</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white/80 rounded-xl p-5 border border-slate-200 w-full overflow-x-auto shadow-sm mt-2">
+                    <h3 class="font-black text-[#1E293B] mb-4 text-lg">أحدث الكورسات المسجلة</h3>
+                    <table class="w-full text-sm text-right min-w-[600px]">
+                        <thead class="text-[#64748B] border-b-2 border-slate-300">
+                            <tr>
+                                <th class="pb-3 font-bold w-1/2">اسم الكورس</th>
+                                <th class="pb-3 font-bold">النوع</th>
+                                <th class="pb-3 font-bold">تاريخ التفاعل</th>
+                                <th class="pb-3 font-bold">الحالة</th>
+                            </tr>
+                        </thead>
+                        <tbody class="font-bold text-[#1E293B]" id="dash_recentTable">
+                            <tr>
+                                <td colspan="4" class="py-6 text-center text-[#64748B]">جاري تحميل البيانات...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Smaller Toggle Button with light vibrate -->
+            <div class="flex justify-center -mt-6 relative z-20 mb-8">
+                <button id="mobileDashToggle"
+                    class="py-2 px-6 bg-gradient-to-r from-slate-800 to-slate-900 border border-primary/50 text-white font-black text-sm rounded-full shadow-[0_0_15px_#20d3ee] btn-vibrate-lite hover:scale-105 transition-all duration-300 flex items-center gap-2 cursor-pointer"
+                    onclick="toggleDashboardAcc()">
+                    <span id="dashToggleIcon"
+                        class="material-symbols-outlined text-xl transition-transform duration-300">keyboard_arrow_down</span>
+                    <span id="dashToggleText">عرض كامل الإحصائيات</span>
+                </button>
+            </div>
+        </div>
+
+        <div id="mainContent" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
+
+        <footer class="mt-16 flex flex-col justify-center items-center pb-8 gap-4 border-t border-primary/20 pt-8">
+            <div class="flex gap-4">
+                <a href="https://wa.me/201000623768" target="_blank"
+                    class="px-4 py-2 bg-primary/10 border border-primary/40 text-primary rounded-lg font-bold text-sm">اسأل
+                    أ. محمد زايد</a>
+                <a href="https://wa.me/201001809230" target="_blank"
+                    class="px-4 py-2 bg-slate-800 border border-slate-700 text-slate-300 rounded-lg font-bold text-sm">الدعم
+                    الفني</a>
+            </div>
+            <div class="text-slate-500 text-sm font-bold mt-4">جميع الحقوق محفوظة لمنصة أ. محمد زايد © 2026</div>
+            <div class="text-slate-500 text-sm font-bold">
+                <a href="https://wa.me/201001809230" target="_blank"
+                    class="hover:text-primary transition-colors">Created by <span class="text-primary">Mustafa
+                        Mahmoud</span></a>
+            </div>
+        </footer>
+    </main>
+
+    <div id="_sd_profileModal" class="profile-modal-overlay">
+        <button class="_sd_closeBtn-fixed" onclick="_sd_closeProfile()">✕</button>
+        <div class="profile-modal-box">
+            <div class="_sd_profile-hero-card">
+                <div class="_sd_profile-cover"></div>
+                <div class="_sd_profile-info-row">
+                    <div class="_sd_avatar-wrap" onclick="document.getElementById('avatarUploadInput').click()"
+                        title="تغيير الصورة الشخصية">
+                        <div class="_sd_avatar-large relative">
+                            <span id="_sd_avatarInitials">؟</span>
+                            <img id="_sd_profileAvatar" src="" alt=""
+                                style="display:none; width: 100%; height: 100%; border-radius: 50%; object-fit: cover; position: absolute; inset: 0;">
+                        </div>
+                        <div class="absolute bottom-0 right-0 bg-primary text-background-dark rounded-full p-1 border-2 border-background-dark flex items-center justify-center transition-transform hover:scale-110"
+                            style="width: 32px; height: 32px; z-index: 10;">
+                            <span class="material-symbols-outlined text-[16px]">photo_camera</span>
+                        </div>
+                    </div>
+                    <input type="file" id="avatarUploadInput" accept="image/*" style="display: none;"
+                        onchange="handleAvatarUpload(event)">
+                    <div class="_sd_profile-names">
+                        <div class="_sd_profile-name" id="_sd_profileName">...</div>
+                        <div class="text-slate-400 text-sm mb-2" id="_sd_profileHandle">جاري التحميل...</div>
+                    </div>
+                </div>
+            </div>
+            <div class="_sd_quick-stats">
+                <div class="_sd_qs-card">
+                    <div>
+                        <div class="_sd_qs-num text-primary" id="_sd_statEnrolled">0</div>
+                        <div class="text-slate-400 text-xs mt-1">كورسات مسجّلة</div>
+                    </div>
+                </div>
+                <div class="_sd_qs-card">
+                    <div>
+                        <div class="_sd_qs-num text-emerald-glow" id="_sd_statWatched">0</div>
+                        <div class="text-slate-400 text-xs mt-1">فيديو شاهدته</div>
+                    </div>
+                </div>
+                <div class="_sd_qs-card">
+                    <div>
+                        <div class="_sd_qs-num text-yellow-400" id="_sd_statPercent">0%</div>
+                        <div class="text-slate-400 text-xs mt-1">نسبة التقدم</div>
+                    </div>
+                </div>
+                <div class="_sd_qs-card">
+                    <div>
+                        <div class="_sd_qs-num text-blue-400" id="_sd_statCompleted">0</div>
+                        <div class="text-slate-400 text-xs mt-1">دورات مكتملة</div>
+                    </div>
+                </div>
+            </div>
+            <div class="_sd_main-grid">
+                <div class="_sd_col-main">
+                    <div class="_sd_card">
+                        <h3 class="font-bold text-lg mb-4 text-white">كورساتي</h3>
+                        <div id="_sd_coursesGrid"></div>
+                        <div id="_sd_coursesEmpty"
+                            style="display:none;text-align:center;color:#94a3b8;padding:32px;font-size:0.85rem;">لا يوجد
+                            كورسات بعد</div>
+                    </div>
+                    <div class="_sd_card">
+                        <h3 class="font-bold text-lg mb-4 text-white">نشاط الأسبوع</h3>
+                        <div class="_sd_activity-chart" id="_sd_actChart"></div>
+                    </div>
+                </div>
+                <div class="_sd_col-side">
+                    <div class="_sd_card">
+                        <h3 class="font-bold text-lg mb-4 text-white">معلومات شخصية</h3>
+                        <div class="flex flex-col gap-4">
+                            <div><span class="text-slate-500 text-xs">الاسم الكامل</span>
+                                <div class="text-white text-sm font-bold" id="_sd_infoName">...</div>
+                            </div>
+                            <div><span class="text-slate-500 text-xs">البريد الإلكتروني</span>
+                                <div class="text-white text-sm font-bold" id="_sd_profileEmail">...</div>
+                            </div>
+                            <div><span class="text-slate-500 text-xs">رقم الهاتف</span>
+                                <div class="text-white text-sm font-bold" id="_sd_profilePhone">...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="notificationsModal" class="fixed inset-0 bg-[#020408]/80 backdrop-blur-sm z-[10000] items-center justify-center p-4">
+        <div class="w-full max-w-lg glass-panel rounded-2xl border border-primary/30 overflow-hidden flex flex-col max-h-[80vh]">
+            <div class="p-4 border-b border-primary/20 flex justify-between items-center bg-background-dark">
+                <h3 class="font-display font-bold text-xl text-white flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary">notifications_active</span> الإشعارات
+                </h3>
+                <button onclick="closeNotifications()" class="text-slate-400 hover:text-red-500 transition-colors">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <div id="notificationsList" class="p-4 overflow-y-auto flex-1 flex flex-col gap-3 custom-scrollbar">
+                <div class="text-center text-slate-500 py-8">جاري التحميل...</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="supabase-config.js"></script>
+    <script>
+        let currentUserData = { name: '', phone: '', email: '' };
+        let _sd_allCourses = [];
+        let _sd_enrolledIds = [];
+        let _sd_watchedIds = [];
+        let _sd_completedCourseIds = [];
+
+        async function checkStudentSecurity() {
+            const { data: { user } } = await window.supabase.auth.getUser();
+            if (!user) { window.location.replace('login.html'); return null; }
+            const { data: profile } = await window.supabase.from('profiles').select('is_banned').eq('id', user.id).single();
+            if (profile && profile.is_banned === true) {
+                await window.supabase.auth.signOut();
+                Swal.fire({ icon: 'error', title: 'تم حظر حسابك! 🚫', allowOutsideClick: false, allowEscapeKey: false, showCloseButton: false, background: '#0f172a', color: '#fff' });
+                return null;
+            }
+            return user;
+        }
+
+        window.getBestYtThumb = function (imgElement, vidId) {
+            const qualities = ['mqdefault.jpg', 'sddefault.jpg', 'default.jpg'];
+            let attempt = parseInt(imgElement.getAttribute('data-attempt') || '0');
+            if (attempt < qualities.length) {
+                imgElement.src = `https://img.youtube.com/vi/${vidId}/${qualities[attempt]}`;
+                imgElement.setAttribute('data-attempt', attempt + 1);
+            } else {
+                imgElement.style.display = 'none';
+                if (imgElement.parentElement) imgElement.parentElement.style.background = 'linear-gradient(135deg,#050b14,#0d1f38)';
+            }
+        };
+
+        function handleAvatarUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const base64Image = e.target.result;
+                    localStorage.setItem('studentAvatar', base64Image);
+                    applyAvatar(base64Image);
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function applyAvatar(base64Image) {
+            if (base64Image) {
+                const headerAvatar = document.getElementById('_sd_headerAvatar');
+                const profileAvatar = document.getElementById('_sd_profileAvatar');
+                const initials = document.getElementById('_sd_avatarInitials');
+                if (headerAvatar) headerAvatar.src = base64Image;
+                if (profileAvatar) { profileAvatar.src = base64Image; profileAvatar.style.display = 'block'; }
+                if (initials) initials.style.display = 'none';
+            }
+        }
+
+        // =====================================================================
+        // دالة الحساب اللايف (Live Dashboard Data)
+        // =====================================================================
+        async function calculateStudentProgress() {
+            try {
+                // 1. التأكد من هوية الطالب
+                const { data: { user } } = await window.supabase.auth.getUser();
+                if (!user) return;
+
+                // 2. وضع اسم الطالب بالكامل في الهيدر بتاع الداشبورد
+                if (typeof currentUserData !== 'undefined' && currentUserData.name) {
+                    const fullName = currentUserData.name; // تم التعديل لجلب الاسم بالكامل
+                    const nameEl = document.getElementById('dash_userName');
+                    if (nameEl) nameEl.textContent = `مرحباً، ${fullName} 👋`;
+                }
+
+                // 3. جلب الاشتراكات وحسابها
+                const { data: enrollData } = await window.supabase.from('enrollments').select('course_id').eq('student_id', user.id);
+                const enrolledCourseIds = enrollData ? enrollData.map(e => e.course_id) : [];
+                const enrolledCount = enrolledCourseIds.length;
+
+                const enrolledEl = document.getElementById('dash_enrolled');
+                if (enrolledEl) enrolledEl.textContent = enrolledCount;
+
+                const motivEl = document.getElementById('dash_motivation');
+                const tableBody = document.getElementById('dash_recentTable');
+
+                // لو مفيش اشتراكات، بنقفل الحسابات بدري ونظهر رسالة
+                if (enrolledCount === 0) {
+                    if (motivEl) motivEl.textContent = "اشترك في كورس دلوقتي وابدأ رحلتك!";
+                    if (tableBody) tableBody.innerHTML = `<tr><td colspan="4" class="py-6 text-center text-[#64748B]">لا توجد كورسات مسجلة بعد.</td></tr>`;
+                    return;
+                }
+
+                // 4. جلب إجمالي الفيديوهات والمُشاهد منها
+                const { count: totalVideos } = await window.supabase.from('videos').select('*', { count: 'exact', head: true }).in('course_id', enrolledCourseIds);
+                const { data: watchedData } = await window.supabase.from('video_progress').select('video_id').eq('user_id', user.id);
+                const watchedCount = watchedData ? watchedData.length : 0;
+
+                const watchedEl = document.getElementById('dash_watched');
+                if (watchedEl) watchedEl.textContent = watchedCount;
+
+                // 5. حساب الكورسات المكتملة
+                let completedCoursesCount = 0;
+                const { data: allVideos } = await window.supabase.from('videos').select('id, course_id').in('course_id', enrolledCourseIds);
+
+                if (allVideos && watchedData) {
+                    const watchedVideoIds = watchedData.map(w => w.video_id);
+                    enrolledCourseIds.forEach(courseId => {
+                        const courseVideos = allVideos.filter(v => v.course_id === courseId);
+                        if (courseVideos.length > 0) {
+                            const isCompleted = courseVideos.every(v => watchedVideoIds.includes(v.id));
+                            if (isCompleted) completedCoursesCount++;
+                        }
+                    });
+                }
+                const completedEl = document.getElementById('dash_completed');
+                if (completedEl) completedEl.textContent = completedCoursesCount;
+
+                // 6. النسبة المئوية للبار العلوي
+                const percent = totalVideos === 0 ? 0 : Math.round((watchedCount / totalVideos) * 100);
+
+                const percentEl = document.getElementById('dash_percent');
+                if (percentEl) percentEl.textContent = percent + '%';
+
+                const barEl = document.getElementById('dash_progressBar');
+                if (barEl) setTimeout(() => { barEl.style.width = percent + '%'; }, 300);
+
+                // 7. رسائل التشجيع بناءً على النسبة
+                const motivationMessages = {
+                    0: "البداية هي أهم خطوة.. جاهز يا بطل؟ 🚀",
+                    5: "سخّن كده وادخل في المود 🔥",
+                    10: "أول 10% بتكسر حاجز الكسل 💪",
+                    15: "أداؤك بيتحسن، استمر 📈",
+                    20: "خُمس المشوار.. أنت ماشي صح 🎯",
+                    25: "ربع المنهج انتهى.. كمل متوقفش! 🏃",
+                    30: "تركيزك عالي والنتيجة بتبان 🧠",
+                    35: "مجهود يحترم يا دكتور 👏",
+                    40: "قربنا على النص.. شد حيلك 🚓",
+                    45: "خطوة بخطوة بتكسر المنهج 🔨",
+                    50: "نص المشوار بالظبط! 🌟",
+                    55: "اللي جاي أسهل من اللي فات ⛷️",
+                    60: "الجيولوجيا والأحياء في الجيب 🎒",
+                    65: "طيارة مفيش حاجة هتوقفك ✈️",
+                    70: "70% إنجاز! قصة نجاح 🏆",
+                    75: "تلات أرباع المنهج! ⏳",
+                    80: "أداء الأوائل.. كمل دغدغة 🌪️",
+                    85: "ريحة التقفيل بتظهر 💯",
+                    90: "90%! بتفنش المنهج.. بطل! 🥇",
+                    95: "اللمسات الأخيرة.. راجع وقفل 🔍",
+                    100: "أسطورة الأحياء والجيولوجيا 👑🎉"
+                };
+                const step = Math.floor(percent / 5) * 5;
+                if (motivEl) motivEl.textContent = motivationMessages[step] || "استمر في التقدم!";
+
+                // 8. ملء جدول الكورسات ديناميكياً
+                if (tableBody) {
+                    const { data: allDashboardCourses } = await window.supabase.from('courses').select('*').order('order_index', { ascending: true });
+                    if (allDashboardCourses && allDashboardCourses.length > 0) {
+                        tableBody.innerHTML = allDashboardCourses.map(course => {
+                            const isEnrolled = enrolledCourseIds.includes(course.id) || course.is_free;
+                            const statusBadge = isEnrolled
+                                ? `<span class="bg-teal-100 text-teal-800 px-3 py-1 rounded-md font-black text-xs border border-teal-300 shadow-sm">نشط ومفعل</span>`
+                                : `<span class="bg-red-50 text-red-600 px-3 py-1 rounded-md font-black text-[10px] border border-red-200">مغلق / لم يتم التفعيل</span>`;
+                            const typeBadge = isEnrolled
+                                ? `<span class="bg-blue-100 text-blue-700 px-2 py-1 rounded text-[10px] font-bold">متاح</span>`
+                                : `<span class="bg-gray-200 text-gray-500 px-2 py-1 rounded text-[10px] font-bold">مقفل</span>`;
+
+                            return `
+                            <tr class="border-b border-slate-200/60 hover:bg-slate-50 transition ${!isEnrolled ? 'opacity-60 grayscale hover:grayscale-0' : ''}">
+                                <td class="py-4 font-black text-[#1E293B]">${course.title}</td>
+                                <td>${typeBadge}</td>
+                                <td class="text-slate-500 text-xs font-bold">${isEnrolled ? 'متاح للتشغيل' : 'برجاء التفعيل'}</td>
+                                <td>${statusBadge}</td>
+                            </tr>`;
+                        }).join('');
+                    }
+                }
+
+            } catch (err) {
+                console.error("خطأ في حساب الإحصائيات:", err);
+            }
+        }
+
+        async function loadContent() {
+            try {
+                const user = await checkStudentSecurity();
+                if (!user) return;
+
+                const { data: p } = await window.supabase.from('profiles').select('*').eq('id', user.id).single();
+                if (p) {
+                    currentUserData = { name: p.full_name, phone: p.phone, email: user.email };
+                    const firstName = p.full_name.split(' ')[0];
+                    const nameEl = document.getElementById('dash_userName');
+                    if (nameEl) nameEl.textContent = `مرحباً، ${firstName} 👋`;
+                }
+
+                const { data: courses } = await window.supabase.from('courses').select('*').order('order_index', { ascending: true });
+                const { data: enroll } = await window.supabase.from('enrollments').select('course_id').eq('student_id', user.id);
+                const enrolledIds = enroll ? enroll.map(e => e.course_id) : [];
+
+                const html = await Promise.all(courses.map(async (c) => {
+                    const isUnlocked = c.is_free || enrolledIds.includes(c.id);
+                    let _cType = c.is_free ? 'free' : (isUnlocked ? 'paid-unlocked' : 'locked');
+                    let statusBadge = '';
+                    let actionBtn = '';
+                    let courseImage = c.image_url || 'https://via.placeholder.com/400x500/101f22/20d3ee?text=Course';
+                    let lockOverlay = '';
+
+                    if (isUnlocked) {
+                        statusBadge = `<span class="px-3 py-1 bg-primary/20 text-primary border border-primary rounded-full text-[10px] font-bold uppercase tracking-wider backdrop-blur-md shadow-[0_0_10px_rgba(32,211,238,0.3)]">مفتوح</span>`;
+                        actionBtn = `<button onclick="window.location.href='player.html?course_id=${c.id}&is_free=${c.is_free}'" class="w-full py-2 bg-primary/10 border border-primary/40 text-primary rounded-lg font-bold text-sm hover:bg-primary hover:text-background-dark transition-all">دخول الكورس</button>`;
+
+                        if (!c.image_url) {
+                            const { data: vids } = await window.supabase.from('videos').select('*').eq('course_id', c.id).limit(1);
+                            if (vids && vids.length > 0 && vids[0].source_type === 'youtube') {
+                                const fId = (vids[0].video_url.split('v=')[1] || vids[0].video_url.split('/').pop()).split('&')[0];
+                                courseImage = `https://img.youtube.com/vi/${fId}/hqdefault.jpg`;
+                            }
+                        }
+                        return `
+                        <div class="course-card-item group relative rounded-[20px] p-[2px] overflow-hidden transition-transform duration-300 hover:scale-[1.02]" data-ctype="${_cType}">
+                            <div class="absolute top-1/2 left-1/2 w-[150%] h-[150%] -translate-x-1/2 -translate-y-1/2 z-0 opacity-80" style="background: conic-gradient(from var(--angle), transparent 0%, transparent 60%, #20d3ee 100%); animation: autoRotate 4s linear infinite;"></div>
+                            <div class="relative z-10 w-full rounded-[18px] bg-background-dark overflow-hidden flex flex-col justify-end aspect-[4/5] p-5 shadow-[inset_0_0_20px_rgba(32,211,238,0.1)]">
+                                <div class="absolute inset-0 bg-cover bg-center opacity-70 transition-opacity duration-300 group-hover:opacity-100" style="background-image:url('${courseImage}');"></div>
+                                <div class="absolute inset-0 bg-gradient-to-t from-background-dark via-background-dark/80 to-transparent z-0 pointer-events-none"></div>
+                                <div class="absolute top-4 left-4 z-20">${statusBadge}</div>
+                                <div class="z-20 relative">
+                                    <h3 class="font-display text-xl font-bold text-white mb-2 leading-tight drop-shadow-md">${c.title}</h3>
+                                    <p class="text-slate-400 text-sm line-clamp-2 mb-4">${c.description || 'كورس في منصة أ. محمد زايد'}</p>
+                                    ${actionBtn}
+                                </div>
+                            </div>
+                        </div>`;
+                    } else {
+                        actionBtn = `
+                        <div class="flex gap-2 flex-col mt-4">
+                            <button onclick="initiatePaymobPayment('${c.id}','${c.title}',${c.price})" class="w-full py-2.5 bg-gradient-to-r from-red-600 to-orange-500 text-white rounded-lg font-black text-sm transition-all shadow-[0_0_15px_rgba(255,15,15,0.4)] hover:shadow-[0_0_25px_rgba(255,15,15,0.7)] hover:scale-105">اشتراك أونلاين (${c.price} ج 💰)</button>
+                            <button onclick="redeemCode('${c.id}')" class="w-full py-2 bg-black/50 border border-slate-700 text-slate-300 rounded-lg font-bold text-xs hover:bg-slate-800 transition-colors">أدخل كود السنتر 🎟️</button>
+                        </div>`;
+
+                        return `
+                        <div class="course-card-item group relative rounded-[20px] p-[2px] overflow-hidden transition-transform duration-300" data-ctype="${_cType}">
+                            <div class="absolute top-1/2 left-1/2 w-[150%] h-[150%] -translate-x-1/2 -translate-y-1/2 z-0 opacity-90" style="background: conic-gradient(from var(--angle), transparent 0%, transparent 60%, #ff0f0f 80%, #ff8c00 100%); animation: autoRotate 3s linear infinite reverse;"></div>
+                            <div class="relative z-10 w-full rounded-[18px] bg-[#050505] overflow-hidden flex flex-col justify-center aspect-[4/5] p-5 shadow-[inset_0_0_30px_rgba(255,0,0,0.15)] text-center transition-colors">
+                                <div class="absolute inset-0 bg-cover bg-center opacity-30 blur-[3px] grayscale group-hover:grayscale-0 transition-all duration-700" style="background-image:url('${courseImage}');"></div>
+                                <div class="absolute inset-0 bg-gradient-to-b from-black/60 via-black/80 to-[#100000] z-0 pointer-events-none"></div>
+                                <div class="z-20 relative flex flex-col items-center">
+                                    <div class="w-20 h-20 bg-gradient-to-br from-red-500 to-orange-600 rounded-full flex items-center justify-center mb-4 shadow-[0_0_30px_rgba(255,0,0,0.4)] border-2 border-red-300/30">
+                                        <span class="material-symbols-outlined text-4xl text-white shaking-lock">lock</span>
+                                    </div>
+                                    <span class="px-3 py-1 mb-2 bg-red-500/20 text-red-500 border border-red-500/30 rounded-full text-[10px] font-black tracking-widest backdrop-blur-md">محتوى حصري - مغلق</span>
+                                    <h3 class="font-display text-2xl font-black text-white mb-2 drop-shadow-md">${c.title}</h3>
+                                    ${actionBtn}
+                                </div>
+                            </div>
+                        </div>`;
+                    }
+                }));
+
+                document.getElementById('mainContent').innerHTML = html.join('');
+
+                // الاستدعاء المباشر والصحيح لحساب الأرقام في الداشبورد
+                calculateStudentProgress(user);
+                fetchNotifications();
+
+            } catch (err) { console.error('Load Content Error:', err); }
+        }
+
+        async function initiatePaymobPayment(courseId, courseTitle, price) {
+            Swal.fire({ title: '💳 جاري تجهيز بوابة الدفع', html: 'لحظات وننقلك لإتمام العملية بأمان...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); }, background: '#0f172a', color: '#fff' });
+            try {
+                const authReq = await fetch("https://accept.paymob.com/api/auth/tokens", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ api_key: window.PAYMOB_API_KEY }) });
+                const authData = await authReq.json();
+                const orderReq = await fetch("https://accept.paymob.com/api/ecommerce/orders", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ auth_token: authData.token, amount_cents: Math.round(price * 100), currency: "EGP", items: [{ name: courseTitle, amount_cents: Math.round(price * 100), quantity: 1 }] }) });
+                const orderData = await orderReq.json();
+                const billingData = { email: currentUserData.email || "test@student.com", first_name: currentUserData.name.split(' ')[0] || "Student", last_name: currentUserData.name.split(' ').slice(1).join(' ') || "User", phone_number: currentUserData.phone || "+201000000000", floor: "NA", apartment: "NA", street: "NA", building: "NA", shipping_method: "NA", postal_code: "NA", city: "Cairo", country: "EG", state: "NA" };
+                const keyReq = await fetch("https://accept.paymob.com/api/acceptance/payment_keys", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ auth_token: authData.token, amount_cents: Math.round(price * 100), order_id: orderData.id, billing_data: billingData, currency: "EGP", integration_id: window.PAYMOB_INTEGRATION_ID }) });
+                const keyData = await keyReq.json();
+                if (!keyData.token) throw new Error("Invalid Payment Key Response");
+                localStorage.setItem('pendingCourseId', courseId);
+                window.location.href = `https://accept.paymob.com/api/acceptance/iframes/${window.PAYMOB_IFRAME_ID}?payment_token=${keyData.token}`;
+            } catch (err) {
+                console.error(err);
+                Swal.fire({ icon: 'error', title: 'خطأ في الدفع', text: err.message || 'حدث خطأ غير متوقع', background: '#0f172a', color: '#fff' });
+            }
+        }
+
+        async function redeemCode(targetCourseId) {
+            const user = await checkStudentSecurity();
+            if (!user) return;
+            const { value: enteredCode } = await Swal.fire({ title: '✨ تفعيل بالكود', input: 'text', inputLabel: 'أدخل كود السنتر هنا:', showCancelButton: true, confirmButtonText: '🚀 تفعيل الكورس', cancelButtonText: 'إلغاء', confirmButtonColor: '#10b981', background: '#0f172a', color: '#fff', inputAttributes: { style: 'color: #0f172a; font-size: 1.8rem; font-weight: 900; background-color: #f8fafc; border: 2px solid #20d3ee; box-shadow: 0 0 15px rgba(32,211,238,0.5); border-radius: 10px; padding: 10px; text-align: center; text-transform: uppercase;' } });
+            if (!enteredCode) return;
+            Swal.fire({ title: 'جاري التحقق...', allowOutsideClick: false, background: '#0f172a', color: '#fff', didOpen: () => { Swal.showLoading(); } });
+            const { data, error } = await window.supabase.rpc('secure_redeem_code', { p_code: enteredCode.trim(), p_course_id: targetCourseId });
+            if (error) return Swal.fire({ title: '❌ خطأ', text: 'حدث خطأ.', icon: 'error', background: '#0f172a', color: '#fff' });
+            if (data.success) Swal.fire({ title: '🎉 مبروك!', text: data.message, icon: 'success', background: '#0f172a', color: '#fff' }).then(() => window.location.reload());
+            else Swal.fire({ title: '❌ تنبيه', text: data.message, icon: 'warning', background: '#0f172a', color: '#fff' });
+        }
+
+        (async function checkPaymentCallback() {
+            const params = new URLSearchParams(window.location.search);
+            const pendingCourseId = localStorage.getItem('pendingCourseId');
+            if (params.get('success') === 'true' && pendingCourseId) {
+                Swal.fire({ title: '🎉 تم الدفع بنجاح!', text: 'جاري التفعيل...', icon: 'success', allowOutsideClick: false, showConfirmButton: false, background: '#0f172a', color: '#fff', didOpen: () => { Swal.showLoading(); } });
+                try {
+                    const user = await checkStudentSecurity();
+                    if (user) {
+                        const { error } = await window.supabase.from('enrollments').upsert({ student_id: user.id, course_id: pendingCourseId });
+                        if (error) throw error;
+                        localStorage.removeItem('pendingCourseId');
+                        window.history.replaceState({}, document.title, window.location.pathname);
+                        await Swal.fire({ title: 'مبروك! 🎓', text: 'تم التفعيل بنجاح.', icon: 'success', background: '#0f172a', color: '#fff' });
+                        window.location.reload();
+                    }
+                } catch (err) {
+                    Swal.fire({ title: 'تنبيه', text: 'خطأ في التفعيل. تواصل مع الدعم.', icon: 'warning', background: '#0f172a', color: '#fff' });
+                }
+            } else if (params.get('success') === 'false' && pendingCourseId) {
+                localStorage.removeItem('pendingCourseId');
+                window.history.replaceState({}, document.title, window.location.pathname);
+                await Swal.fire({ title: '❌ فشل الدفع', text: 'لم تكتمل العملية.', icon: 'error', background: '#0f172a', color: '#fff' });
+                window.location.reload();
+            }
+        })();
+
+        async function _sd_openProfile() {
+            document.getElementById('_sd_profileModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+            const name = currentUserData.name || '...';
+            const email = currentUserData.email || '';
+            const phone = currentUserData.phone || '';
+            document.getElementById('_sd_profileName').textContent = name;
+            document.getElementById('_sd_profileEmail').textContent = email;
+            document.getElementById('_sd_profilePhone').textContent = phone ? '📱 ' + phone : '';
+            document.getElementById('_sd_infoName').textContent = name;
+            const handleEl = document.getElementById('_sd_profileHandle');
+            if (handleEl) handleEl.textContent = email || 'طالب';
+
+            const initialsEl = document.getElementById('_sd_avatarInitials');
+            const savedAvatar = localStorage.getItem('studentAvatar');
+            if (savedAvatar) applyAvatar(savedAvatar);
+            else if (initialsEl && name && name !== '...') {
+                initialsEl.textContent = name.trim().charAt(0) || '؟';
+                initialsEl.style.display = 'flex';
+                document.getElementById('_sd_profileAvatar').style.display = 'none';
+            }
+
+            await _sd_loadProfileStats();
+            _sd_renderActivityChartCSS();
+        }
+
+        function _sd_closeProfile() { document.getElementById('_sd_profileModal').classList.remove('active'); document.body.style.overflow = ''; }
+
+        async function _sd_loadProfileStats() {
+            try {
+                const { data: { user } } = await window.supabase.auth.getUser(); if (!user) return;
+                const { data: courses } = await window.supabase.from('courses').select('*').order('order_index', { ascending: true });
+                const { data: enroll } = await window.supabase.from('enrollments').select('course_id').eq('student_id', user.id);
+                _sd_enrolledIds = enroll ? enroll.map(e => e.course_id) : [];
+                _sd_allCourses = courses || [];
+                const { data: watched } = await window.supabase.from('video_progress').select('video_id').eq('user_id', user.id);
+                _sd_watchedIds = watched ? watched.map(w => w.video_id) : [];
+                _sd_completedCourseIds = [];
+                for (const c of _sd_allCourses) {
+                    if (_sd_enrolledIds.includes(c.id) || c.is_free) {
+                        const { count: total } = await window.supabase.from('videos').select('*', { count: 'exact', head: true }).eq('course_id', c.id);
+                        const { data: courseWatched } = await window.supabase.from('video_progress').select('video_id').eq('user_id', user.id).in('video_id', (await window.supabase.from('videos').select('id').eq('course_id', c.id)).data?.map(v => v.id) || []);
+                        if (total > 0 && courseWatched && courseWatched.length >= total) _sd_completedCourseIds.push(c.id);
+                    }
+                }
+                const { count: totalVids } = await window.supabase.from('videos').select('*', { count: 'exact', head: true }).in('course_id', _sd_enrolledIds.length ? _sd_enrolledIds : ['none']);
+                const percent = totalVids > 0 ? Math.round((_sd_watchedIds.length / totalVids) * 100) : 0;
+                document.getElementById('_sd_statEnrolled').textContent = _sd_enrolledIds.length;
+                document.getElementById('_sd_statCompleted').textContent = _sd_completedCourseIds.length;
+                document.getElementById('_sd_statWatched').textContent = _sd_watchedIds.length;
+                document.getElementById('_sd_statPercent').textContent = percent + '%';
+
+                const grid = document.getElementById('_sd_coursesGrid');
+                const empty = document.getElementById('_sd_coursesEmpty');
+                let filtered = _sd_allCourses.filter(c => _sd_enrolledIds.includes(c.id));
+                if (filtered.length === 0) { grid.innerHTML = ''; empty.style.display = 'block'; }
+                else {
+                    empty.style.display = 'none';
+                    grid.innerHTML = filtered.map(c => {
+                        let pct = _sd_completedCourseIds.includes(c.id) ? 100 : Math.floor(Math.random() * 99);
+                        return `<div class="_sd_course-row"><div class="_sd_course-thumb">🎬</div><div class="_sd_course-row-info"><div class="text-white font-bold">${c.title}</div><div class="_sd_prog-bar mt-2"><div class="_sd_prog-fill" style="width:${pct}%"></div></div></div><div class="text-primary font-bold ml-2">${pct}%</div></div>`;
+                    }).join('');
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        function _sd_renderActivityChartCSS() {
+            const chartEl = document.getElementById('_sd_actChart');
+            if (!chartEl) return;
+            chartEl.innerHTML = '';
+            [10, 40, 20, 80, 50, 90, 30].forEach(h => {
+                const col = document.createElement('div'); col.className = '_sd_act-col';
+                const bar = document.createElement('div'); bar.className = '_sd_act-bar';
+                bar.style.height = h + 'px'; col.appendChild(bar); chartEl.appendChild(col);
+            });
+        }
+
+        function _sd2_filterMain(type, btn) {
+            document.querySelectorAll('._sd2_tab-btn').forEach(b => { b.classList.remove('_sd2_active', 'bg-primary', 'text-background-dark'); b.classList.add('text-slate-400'); });
+            btn.classList.add('_sd2_active', 'bg-primary', 'text-background-dark'); btn.classList.remove('text-slate-400');
+            document.querySelectorAll('.course-card-item').forEach(el => {
+                const ctype = el.dataset.ctype || '';
+                let show = (type === 'all') || (type === 'free' && ctype === 'free') || (type === 'enrolled' && (ctype === 'free' || ctype === 'paid-unlocked'));
+                el.style.display = show ? '' : 'none';
+            });
+        }
+
+        // ==========================================
+        // نظام الوضع النهاري والليلي (Dark/Light Mode)
+        // ==========================================
+        function toggleTheme() {
+            const html = document.documentElement;
+            const themeIcon = document.getElementById('themeIcon');
+            const themeText = document.getElementById('themeText');
+
+            if (html.classList.contains('dark')) {
+                // التحويل للوضع النهاري
+                html.classList.remove('dark');
+                localStorage.setItem('studentTheme', 'light');
+                if (themeIcon) themeIcon.textContent = 'dark_mode';
+                if (themeText) themeText.textContent = 'الوضع الليلي';
+            } else {
+                // التحويل للوضع الليلي
+                html.classList.add('dark');
+                localStorage.setItem('studentTheme', 'dark');
+                if (themeIcon) themeIcon.textContent = 'light_mode';
+                if (themeText) themeText.textContent = 'الوضع النهاري';
+            }
+        }
+
+        async function logoutUser() {
+            try { await window.supabase.auth.signOut(); window.location.href = 'index.html'; }
+            catch (err) { Swal.fire({ icon: 'error', title: 'خطأ', background: '#0f172a', color: '#fff' }); }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedAvatar = localStorage.getItem('studentAvatar');
+            if (savedAvatar) applyAvatar(savedAvatar);
+
+            // --- السطور الجديدة اللي هتضيفها هنا ---
+            const savedTheme = localStorage.getItem('studentTheme');
+            if (savedTheme === 'light') {
+                document.documentElement.classList.remove('dark');
+                const tIcon = document.getElementById('themeIcon');
+                const tText = document.getElementById('themeText');
+                if (tIcon) tIcon.textContent = 'dark_mode';
+                if (tText) tText.textContent = 'الوضع الليلي';
+            }
+            // ----------------------------------------
+
+            loadContent();
+        });
+
+        function toggleDashboardAcc() {
+            const dash = document.getElementById('dashboardSection');
+            const fade = document.getElementById('dashFade');
+            const icon = document.getElementById('dashToggleIcon');
+            const txt = document.getElementById('dashToggleText');
+
+            if (dash.classList.contains('max-h-[250px]')) {
+                dash.classList.remove('max-h-[250px]');
+                dash.classList.add('max-h-[2000px]');
+                fade.classList.remove('opacity-100');
+                fade.classList.add('opacity-0');
+                icon.style.transform = 'rotate(180deg)';
+                txt.textContent = 'إخفاء الإحصائيات';
+            } else {
+                dash.classList.add('max-h-[250px]');
+                dash.classList.remove('max-h-[2000px]');
+                fade.classList.remove('opacity-0');
+                fade.classList.add('opacity-100');
+                icon.style.transform = 'rotate(0deg)';
+                txt.textContent = 'عرض كامل الإحصائيات';
+            }
+        }
+
+        let unreadNotificationsIds = [];
+
+        async function fetchNotifications() {
+            const { data: { user } } = await window.supabase.auth.getUser();
+            if (!user) return;
+
+            // 1. نجيب كل الإشعارات (العامة، والخاصة بالطالب ده)
+            const { data: notifications, error: notifError } = await window.supabase
+                .from('notifications')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (notifError) return console.error(notifError);
+
+            // 2. نجيب الإشعارات اللي الطالب ده قرأها قبل كده
+            const { data: reads, error: readsError } = await window.supabase
+                .from('notification_reads')
+                .select('notification_id')
+                .eq('user_id', user.id);
+
+            if (readsError) return console.error(readsError);
+
+            const readIds = reads.map(r => r.notification_id);
+            
+            // 3. نحسب الإشعارات اللي لسه متقرتش
+            unreadNotificationsIds = notifications
+                .filter(n => !readIds.includes(n.id))
+                .map(n => n.id);
+
+            const badge = document.getElementById('notifBadge');
+            const bell = document.getElementById('bellIcon');
+
+            // تفعيل تأثير الهزة والبادج والرسالة لو في إشعارات جديدة
+            if (unreadNotificationsIds.length > 0) {
+                badge.textContent = unreadNotificationsIds.length;
+                badge.classList.remove('hidden');
+                bell.classList.add('bell-ringing');
+                
+                // إظهار الرسالة المنبثقة (Tooltip)
+                const latestNotif = notifications.find(n => n.id === unreadNotificationsIds[0]);
+                document.getElementById('tooltipText').textContent = latestNotif ? latestNotif.title : 'لديك إشعارات جديدة لم تقرأها';
+                document.getElementById('bellTooltip').classList.add('notif-tooltip-show');
+            } else {
+                badge.classList.add('hidden');
+                bell.classList.remove('bell-ringing');
+                document.getElementById('bellTooltip').classList.remove('notif-tooltip-show');
+            }
+
+            // تجهيز الـ HTML بتاع الإشعارات
+            renderNotificationsToModal(notifications, readIds);
+        }
+
+        function renderNotificationsToModal(notifications, readIds) {
+            const list = document.getElementById('notificationsList');
+            if (notifications.length === 0) {
+                list.innerHTML = `<div class="text-center text-slate-500 py-8"><span class="material-symbols-outlined text-4xl mb-2 opacity-50">notifications_paused</span><br>لا توجد إشعارات حالياً</div>`;
+                return;
+            }
+
+            list.innerHTML = notifications.map(n => {
+                const isRead = readIds.includes(n.id);
+                const date = new Date(n.created_at).toLocaleDateString('ar-EG');
+                return `
+                <div class="notification-card p-4 rounded-xl ${isRead ? '' : 'unread'} w-full overflow-hidden">
+                    <div class="flex justify-between items-start mb-2 gap-3">
+                        <h4 class="font-bold text-white text-sm break-words flex-1 leading-tight">${n.title}</h4>
+                        <span class="text-[10px] text-slate-500 bg-background-dark px-2 py-1 rounded-full shrink-0">${date}</span>
+                    </div>
+                    <p class="text-slate-400 text-xs leading-relaxed break-words whitespace-pre-wrap">${n.message}</p>
+                </div>
+                `;
+            }).join('');
+        }
+
+        async function openNotifications() {
+            document.getElementById('notificationsModal').classList.add('active');
+            document.getElementById('bellTooltip').classList.remove('notif-tooltip-show');
+            
+            // لو فيه إشعارات جديدة، نوقف الهزة ونعلمها إنها اتقرأت في الداتا بيز
+            if (unreadNotificationsIds.length > 0) {
+                document.getElementById('notifBadge').classList.add('hidden');
+                document.getElementById('bellIcon').classList.remove('bell-ringing');
+                
+                const { data: { user } } = await window.supabase.auth.getUser();
+                
+                // تجهيز الداتا للإدخال
+                const readsToInsert = unreadNotificationsIds.map(n_id => ({
+                    notification_id: n_id,
+                    user_id: user.id
+                }));
+
+                // إدخال في الداتا بيز في الخلفية بدون ما نوقف الـ UI
+                window.supabase.from('notification_reads').insert(readsToInsert).then(({error}) => {
+                    if(!error) unreadNotificationsIds = []; // تصفير المصفوفة
+                });
+                
+                // تحديث الـ UI فورا عشان تبان إنها اتقرأت
+                document.querySelectorAll('.notification-card.unread').forEach(el => el.classList.remove('unread'));
+            }
+        }
+
+        function closeNotifications() {
+            document.getElementById('notificationsModal').classList.remove('active');
+        }
+    </script>
+</body>
+
+</html>
