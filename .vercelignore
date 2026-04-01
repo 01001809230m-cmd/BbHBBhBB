@@ -1,0 +1,4 @@
+backend-php
+migrations
+node_modules
+*.env*
